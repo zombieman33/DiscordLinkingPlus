@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class DiscordLinkingPlus extends JavaPlugin {
     private RankManager rankManager;
-    private API api;
+    private static API api;
     private PlayerDatabase playerDatabase;
     private JedisPool jedisPool;
     private Thread redisSubscriberThread;
@@ -240,7 +240,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     public boolean isMainServer() {
         return getConfig().getBoolean("MainServer", true);
     }
-    public API getApi() {
+    public static API getApi() {
         return api;
     }
     public void assignRoleToAllMembers() {
