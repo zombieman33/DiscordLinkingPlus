@@ -1,0 +1,12 @@
+name: DiscordLinkingPlus
+version: '${project.version}'
+main: me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus
+api-version: '1.20'
+authors: [zombieman]
+commands:
+  claimrewards:
+  link:
+  unlink:
+  discordadmin:
+    aliases:
+      - da

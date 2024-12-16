@@ -1,0 +1,213 @@
+# Main server is the server that all
+# of the discord messages will go through!
+# Only put this to true on one of your servers.
+# If you put this to true on more than one server
+# it will send the discord message more than once.
+
+MainServer: false
+
+database:
+  mysql:
+    username: username
+    password: null
+    url: example.com
+
+    # FOR CROSS SERVER REWARDS SYSTEM YOU WILL NEED
+    # A MYSQL AND REDIS DATABASE!
+
+  redis:
+    host: example.com
+    port: port
+    username: username
+    password: null
+
+DiscordBotToken: null
+DiscordServerToken: 927172634830045264
+Link: https://discord.fewer.live/
+FakeLink: https://discord.fewer.live/
+
+NeedsToSendInDm: false
+LinkingChannelID: 1291480710749622282
+
+DiscordLogsChannelID: 1291128583263355041
+
+ServerName: Fewer
+
+server:
+  name: "Hub"
+  rewardsTo: "all"
+
+# %ingame-name% is minecraft name
+# %discord-name% is discord name
+# %rank% is the rank
+
+ShouldRankBeUppercase: true
+DiscordNickname: "%rank% | %ingame-name%"
+
+UnLink:
+  allowed: true
+  shouldSendMessage: true
+  shouldPlaySound: true
+
+LinkingRewards:
+
+  # %reward-amount% will check for how many commands
+  # are added, so if there are 2 commands the amount
+  # will be 2.
+
+  message:
+    - ''
+    - '<green><bold>🎉</bold> Congratulations! You can claim %reward-amount% rewards! <bold>🎉'
+    - '<green>/claimrewards (click here)'
+    - ''
+  hover: '<green>Click here to claim rewards!'
+
+  commands:
+    - give %player% diamond 120
+  playerCommands: []
+
+commands:
+  linked:
+    - lp user %player% permission set suffixsplus.suffix.linking
+  unlinked:
+    - lp user %player% permission unset suffixsplus.suffix.linking
+    - lp user %player% parent remove suffix_linking
+
+ranksToRemove:
+  linked:
+    discordRanks:
+      - 1291481026979172423
+  unLinked:
+    discordRanks:
+      - 1291481074198904894
+
+ranksToAdd:
+  linked:
+    discordRanks:
+      - 1291481074198904894
+  unLinked:
+    discordRanks:
+      - 1291481026979172423
+
+# discordlinkingplus.rank.<rank name>
+
+ranks:
+  linked:
+    update-name: true
+    update-role: true
+    discordRank: 1291481074198904894
+    priority: 0
+  default:
+    update-name: true
+    update-role: true
+    discordRank: 927172634830045273
+    priority: 1
+  prime:
+    update-name: true
+    update-role: true
+    discordRank: 1038108263671152811
+    priority: 2
+  prime_plus:
+    update-name: true
+    update-role: true
+    discordRank: 1287828162054586382
+    priority: 3
+  media:
+    update-name: true
+    update-role: true
+    discordRank: 927172634851045377
+    priority: 4
+  sponsor:
+    update-name: true
+    update-role: true
+    discordRank: 1070125309912940634
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+    priority: 5
+  staff:
+    update-name: false
+    update-role: true
+    discordRank: 949346059417702450
+  trainee:
+    update-name: true
+    update-role: true
+    discordRank: 1290712556381409300
+    priority: 6
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  helper:
+    update-name: true
+    update-role: true
+    discordRank: 931920718210400277
+    priority: 7
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  sr-helper:
+    update-name: true
+    update-role: true
+    discordRank: 1290714843988627580
+    priority: 8
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  jr-mod:
+    update-name: true
+    update-role: false
+    discordRank: 1290712768504135804
+    priority: 9
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  mod:
+    update-name: true
+    update-role: false
+    discordRank: 927172634851045378
+    priority: 10
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  sr-mod:
+    update-name: true
+    update-role: false
+    discordRank: 1290716050211606630
+    priority: 11
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  team:
+    update-name: true
+    update-role: false
+    discordRank: 1189364651981553765
+    priority: 12
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  manager:
+    update-name: true
+    update-role: false
+    discordRank: 1152645514790195273
+    priority: 13
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  admin:
+    update-name: true
+    update-role: false
+    discordRank: 927172634851045380
+    priority: 14
+    check-icon: true
+    icon-prefix: "⭐ "
+    icon-permission: discordlinkingplus.sponsor
+  owner:
+    update-name: true
+    update-role: false
+    discordRank: 1149068425310777494
+    priority: 16
+  founder:
+    update-name: true
+    update-role: false
+    discordRank: 1287400233294368859
+    priority: 17
