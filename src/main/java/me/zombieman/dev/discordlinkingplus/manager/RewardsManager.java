@@ -20,6 +20,7 @@ public class RewardsManager {
         if (!server.equalsIgnoreCase(plugin.getConfig().getString("server.name")) && !server.equalsIgnoreCase("all")) return;
 
         if (Bukkit.getPlayer(uuid) == null) {
+            PlayerData.createFile(plugin, uuid);
             PlayerData.getPlayerDataConfig(plugin, uuid).set("rewardsServer", server);
             PlayerData.savePlayerData(plugin, uuid);
             return;

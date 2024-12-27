@@ -25,6 +25,7 @@ public class RedisSubscriber extends JedisPubSub {
         if (!plugin.isEnabled()) {
             return;
         }
+        System.out.println(message);
 
         String[] parts = message.split(":", 3);
         String action = parts[0];
@@ -87,6 +88,15 @@ public class RedisSubscriber extends JedisPubSub {
         player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                              ");
 
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+
+        try {
+            if (!plugin.getPlayerDatabase().getPlayerData(linkedUUID).isLinked()) {
+                plugin.getPlayerDatabase().updateLinkStatus(linkedUUID, true, true);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error connecting to the database: " + e.getMessage());
+        }
+
     }
     private void handleMessage(String discordID, String message) {
 

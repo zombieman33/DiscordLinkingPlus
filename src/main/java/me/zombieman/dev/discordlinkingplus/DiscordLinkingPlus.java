@@ -19,6 +19,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -140,6 +142,8 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         linkPlaceholders = new LinkPlaceholders(this);
         linkPlaceholders.register();
 
+        scheduleLinkReminder();
+
     }
 
     @Override
@@ -174,7 +178,6 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         if (DiscordBot.getBot() != null) {
             DiscordBot.shutdown();
         }
-        scheduleLinkReminder();
     }
 
     public void scheduleLinkReminder() {
