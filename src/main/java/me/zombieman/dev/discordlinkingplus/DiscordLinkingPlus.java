@@ -11,6 +11,7 @@ import me.zombieman.dev.discordlinkingplus.database.redis.RedisSubscriber;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordListener;
 import me.zombieman.dev.discordlinkingplus.listeners.PlayerJoinListener;
+import me.zombieman.dev.discordlinkingplus.manager.CodeManager;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
 import me.zombieman.dev.discordlinkingplus.manager.RankManager;
 import me.zombieman.dev.discordlinkingplus.placeholders.LinkPlaceholders;
@@ -33,6 +34,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -209,7 +212,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
                     }
                 }
             }
-        }.runTaskTimerAsynchronously(this, 0L, 20L * 60L * 30);
+        }.runTaskTimerAsynchronously(this, 0L, 20L * 60L * 40);
     }
 
     public PlayerDatabase getPlayerDatabase() {

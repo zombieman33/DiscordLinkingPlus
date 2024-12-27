@@ -30,9 +30,9 @@ public class DiscordListener extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         String code = event.getMessage().getContentRaw();
+
         boolean needsToSendInDm = plugin.getConfig().getBoolean("NeedsToSendInDm");
 
-        // Check if the message was sent in the correct channel
         if (event.getChannelType() == ChannelType.TEXT && event.getChannel().getId().equals(plugin.getConfig().getString("LinkingChannelID")) && !needsToSendInDm) {
 
             if (event.getMessage() != null) {
@@ -51,7 +51,6 @@ public class DiscordListener extends ListenerAdapter {
     }
 
     private void handleCodeInPrivateMessage(MessageReceivedEvent event, String code) {
-
 
         try {
             if (plugin.getPlayerDatabase().isDiscordIdLinked(event.getAuthor().getId())) {
