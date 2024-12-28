@@ -24,10 +24,12 @@ public class CodeManager {
 
         String finalCode = code;
 
+        int min = plugin.getConfig().getInt("CodeTime", 10);
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             codes.remove(finalCode);
             playersCode.remove(finalCode);
-        }, 60 * 20L);
+        }, 60 * min * 20L);
 
         return code;
     }

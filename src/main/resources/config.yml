@@ -6,6 +6,9 @@
 
 MainServer: false
 
+# The time is in minutes.
+CodeTime: 10
+
 database:
   mysql:
     username: username

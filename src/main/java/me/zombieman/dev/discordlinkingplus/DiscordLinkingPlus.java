@@ -193,7 +193,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
                     try {
-                        if (!getPlayerDatabase().getPlayerData(player.getUniqueId()).isLinked()) continue;
+                        if (getPlayerDatabase().getPlayerData(player.getUniqueId()).isLinked()) continue;
 
                         player.sendMessage(MiniMessage.miniMessage().deserialize("""
                             <green><strikethrough>                                           </strikethrough>

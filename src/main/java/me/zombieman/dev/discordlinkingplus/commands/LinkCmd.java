@@ -20,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class LinkCmd implements CommandExecutor {
     private final DiscordLinkingPlus plugin;
@@ -109,21 +110,28 @@ public class LinkCmd implements CommandExecutor {
 
                 TextChannel textChannelById = guildById.getTextChannelById(linkingChannelId);
 
+                int min = plugin.getConfig().getInt("CodeTime", 10);
+
                 Component message = miniMessage.deserialize("<green>Click to copy your code: <bold>" + code)
                         .hoverEvent(HoverEvent.showText(miniMessage.deserialize("<green>Click to copy")))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
 
-                player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                       ");
+                player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                               ");
 
                 player.sendMessage(ChatColor.AQUA.toString() + ChatColor.BOLD + "LINKING");
                 player.sendMessage(message);
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<green>Your code will get deleted in " + min + " min(s)"));
 
                 player.sendActionBar(ChatColor.GREEN + "Your code: " + ChatColor.BOLD + code);
                 player.sendTitle(ChatColor.GREEN + "Your code: " + ChatColor.BOLD + code, "");
 
                 player.sendMessage(ChatColor.GRAY + "Please send the code in");
                 player.sendMessage(ChatColor.GRAY + "the following Discord channel:");
-                player.sendMessage(ChatColor.AQUA + "Channel: " + ChatColor.BOLD + textChannelById.getName());
+
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<aqua>Channel: <bold>" + textChannelById.getName())
+                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, "https://discord.com/channels/" + plugin.getGuild().getId() + "/" + textChannelById.getId()))
+                        .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize("<aqua>Click to go to the channel."))));
+
                 player.sendMessage(ChatColor.AQUA + "Server: " + ChatColor.BOLD + guildById.getName());
 
                 String link = plugin.getConfig().getString("Link");
@@ -137,7 +145,7 @@ public class LinkCmd implements CommandExecutor {
                             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, link)));
                 }
 
-                player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                       ");
+                player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                               ");
 
 
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
