@@ -49,7 +49,7 @@ public class LinkCmd implements CommandExecutor {
             try {
 
                 if (plugin.getPlayerDatabase().getPlayerData(player.getUniqueId()).isLinked()) {
-                    player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                          ");
+                    player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                          ");
                     player.sendMessage(ChatColor.GREEN + "You have already linked your accounts!");
 
                     String discordName = "n/a";
@@ -65,7 +65,7 @@ public class LinkCmd implements CommandExecutor {
                                 .hoverEvent(HoverEvent.showText(miniMessage.deserialize("<aqua>Click to unlink!")))
                                 .clickEvent(ClickEvent.runCommand("/unlink")));
                     }
-                    player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                          ");
+                    player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                          ");
                     return;
                 }
 
@@ -75,7 +75,14 @@ public class LinkCmd implements CommandExecutor {
                 return;
             }
 
-            String code = CodeManager.createCode(plugin, player.getUniqueId());
+            String code = null;
+            try {
+                code = CodeManager.createCode(player.getUniqueId(), plugin.getConfig().getInt("CodeTime", 10));
+            } catch (SQLException e) {
+                player.sendMessage(ChatColor.RED + "There was an error while connecting to the database, please try again later.");
+                plugin.getLogger().severe("Database not responding: " + e.getMessage());
+                return;
+            }
 
             boolean needsToSendInDm = plugin.getConfig().getBoolean("NeedsToSendInDm");
 
@@ -116,11 +123,11 @@ public class LinkCmd implements CommandExecutor {
                         .hoverEvent(HoverEvent.showText(miniMessage.deserialize("<green>Click to copy")))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
 
-                player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                               ");
+                player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                               ");
 
                 player.sendMessage(ChatColor.AQUA.toString() + ChatColor.BOLD + "LINKING");
                 player.sendMessage(message);
-                player.sendMessage(MiniMessage.miniMessage().deserialize("<green>Your code will get deleted in " + min + " min(s)"));
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<green>Your code will be deleted in " + min + " min(s)"));
 
                 player.sendActionBar(ChatColor.GREEN + "Your code: " + ChatColor.BOLD + code);
                 player.sendTitle(ChatColor.GREEN + "Your code: " + ChatColor.BOLD + code, "");
@@ -145,7 +152,7 @@ public class LinkCmd implements CommandExecutor {
                             .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, link)));
                 }
 
-                player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                               ");
+                player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                               ");
 
 
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);

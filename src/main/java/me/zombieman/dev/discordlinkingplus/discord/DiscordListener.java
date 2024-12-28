@@ -52,6 +52,8 @@ public class DiscordListener extends ListenerAdapter {
 
     private void handleCodeInPrivateMessage(MessageReceivedEvent event, String code) {
 
+        if (!plugin.isMainServer()) return;
+
         try {
             if (plugin.getPlayerDatabase().isDiscordIdLinked(event.getAuthor().getId())) {
                 sendMessage(event, "❌ Error linking account, this discord account is already linked.");
@@ -64,11 +66,27 @@ public class DiscordListener extends ListenerAdapter {
         }
 
 
-        if (!isValidCode(code)) {
-            sendMessage(event, "❌ Invalid code. Please try again.");
+        try {
+            if (!isValidCode(code)) {
+                sendMessage(event, "❌ Invalid code. Please try again.");
+                return;
+            }
+        } catch (SQLException e) {
+            sendMessage(event, "❌ Error connecting to database. Please try again later.");
+            System.err.println("Error connecting to database: " + e.getMessage());
             return;
         }
-        UUID uuid = CodeManager.getPlayerWithCode(code);
+
+        UUID uuid = null;
+
+        try {
+            uuid = CodeManager.getPlayerWithCode(code);
+        } catch (SQLException e) {
+            sendMessage(event, "❌ Error connecting to database. Please try again later.");
+            System.err.println("Error connecting to database: " + e.getMessage());
+            return;
+        }
+
         if (uuid == null) {
             sendMessage(event, "❌ Invalid code. Please try again.");
             return;
@@ -128,7 +146,13 @@ public class DiscordListener extends ListenerAdapter {
             return;
         }
 
-        CodeManager.removeCode(code);
+        try {
+            CodeManager.removeCode(code);
+        } catch (SQLException e) {
+            sendMessage(event, "❌ Error connecting to database. Please try again later.");
+            System.err.println("Error connecting to database: " + e.getMessage());
+            return;
+        }
 
         try {
             try (Jedis jedis = plugin.getJedisResource()) {
@@ -177,7 +201,7 @@ public class DiscordListener extends ListenerAdapter {
         });
     }
 
-    private boolean isValidCode(String code) {
+    private boolean isValidCode(String code) throws SQLException {
         return CodeManager.checkCode(code);
     }
 }

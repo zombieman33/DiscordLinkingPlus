@@ -43,6 +43,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     private RankManager rankManager;
     private static API api;
     private PlayerDatabase playerDatabase;
+    private CodeManager codeManager;
     private JedisPool jedisPool;
     private Thread redisSubscriberThread;
     private JDA jda;
@@ -73,6 +74,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             String username = getConfig().getString("database.mysql.username");
             String password = getConfig().getString("database.mysql.password");
             playerDatabase = new PlayerDatabase(url, username, password);
+            codeManager = new CodeManager(url, username, password);
             getLogger().info("Connected to MySQL database");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -147,6 +149,8 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
         scheduleLinkReminder();
 
+        codeManager.startExpiredCodeCleanup(this);
+
     }
 
     @Override
@@ -194,6 +198,8 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
                     try {
                         if (getPlayerDatabase().getPlayerData(player.getUniqueId()).isLinked()) continue;
+
+                        if (!player.hasPermission("discordlinkingplus.command.link")) continue;
 
                         player.sendMessage(MiniMessage.miniMessage().deserialize("""
                             <green><strikethrough>                                           </strikethrough>
