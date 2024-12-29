@@ -72,9 +72,11 @@ LinkingRewards:
 commands:
   linked:
     - lp user %player% permission set suffixsplus.suffix.linking
+    - lp user %player% parent add member_plus
   unlinked:
     - lp user %player% permission unset suffixsplus.suffix.linking
     - lp user %player% parent remove suffix_linking
+    - lp user %player% parent remove member_plus
 
 ranksToRemove:
   linked:

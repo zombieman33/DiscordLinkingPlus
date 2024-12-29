@@ -199,7 +199,6 @@ public class RankManager {
     }
 
     public void commands(String playerName, boolean isLinked) {
-        // Determine the path based on the linked status
         String linkedOrNot = isLinked ? "linked" : "unlinked";
         String path = "commands." + linkedOrNot;
 

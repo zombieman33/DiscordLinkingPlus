@@ -36,12 +36,12 @@ public class DiscordListener extends ListenerAdapter {
         if (event.getChannelType() == ChannelType.TEXT && event.getChannel().getId().equals(plugin.getConfig().getString("LinkingChannelID")) && !needsToSendInDm) {
 
             if (event.getMessage() != null) {
-                try {
-                    event.getMessage().delete().queue();
-                } catch (Exception e) {
-                    System.err.println("Unexpected error while deleting message: " + e.getMessage());
-                }
+                event.getMessage().delete().queue(
+                        success -> {},
+                        failure -> System.err.println("Failed to delete message: " + failure.getMessage())
+                );
             }
+
 
             handleCodeInPrivateMessage(event, code);
 
@@ -154,13 +154,25 @@ public class DiscordListener extends ListenerAdapter {
             return;
         }
 
+        String hasLinked = "";
+
+        try {
+            if (!plugin.getPlayerDatabase().getPlayerData(uuid).hasLinked()) {
+                hasLinked = "~~> You can claim your rewards on other games by typing `/claimrewards`";
+            }
+        } catch (SQLException e) {
+            sendMessage(event, "❌ Error connecting to database. Please try again later.");
+            System.err.println("Error connecting to database: " + e.getMessage());
+            return;
+        }
+
         try {
             try (Jedis jedis = plugin.getJedisResource()) {
 
                 jedis.publish("DISCORD_LINKING", "LINKED:" + uuid + ":" + event.getAuthor().getName());
 
                 jedis.publish("DISCORD_LINKING",
-                        "MESSAGE:" + event.getAuthor().getId() + ":✅_Successfully_**linked**_your_accounts!~~> **Minecraft:** `%minecraft%`~> **Discord:** %discord%~> **DiscordID:** `%discord-ID%`"
+                        "MESSAGE:" + event.getAuthor().getId() + ":✅_Successfully_**linked**_your_accounts!~~> **Minecraft:** `%minecraft%`~> **Discord:** %discord%~> **DiscordID:** `%discord-ID%`" + hasLinked
                         .replace("%minecraft%", playerName)
                         .replace("%discord%", event.getAuthor().getAsMention())
                         .replace("%discord-ID%", event.getAuthor().getId()));

@@ -49,7 +49,7 @@ public class LinkCmd implements CommandExecutor {
             try {
 
                 if (plugin.getPlayerDatabase().getPlayerData(player.getUniqueId()).isLinked()) {
-                    player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                          ");
+                    player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                                   ");
                     player.sendMessage(ChatColor.GREEN + "You have already linked your accounts!");
 
                     String discordName = "n/a";
@@ -65,7 +65,7 @@ public class LinkCmd implements CommandExecutor {
                                 .hoverEvent(HoverEvent.showText(miniMessage.deserialize("<aqua>Click to unlink!")))
                                 .clickEvent(ClickEvent.runCommand("/unlink")));
                     }
-                    player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                          ");
+                    player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                                   ");
                     return;
                 }
 

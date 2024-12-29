@@ -102,6 +102,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             sender.sendMessage(ChatColor.AQUA + "Player Name: " + ChatColor.BOLD + target);
                             sender.sendMessage(ChatColor.AQUA + "UUID: " + ChatColor.BOLD + uuid);
                             sender.sendMessage(ChatColor.AQUA + "Is Linked: " + ChatColor.BOLD + playerData.isLinked());
+                            sender.sendMessage(ChatColor.AQUA + "Has Linked: " + ChatColor.BOLD + playerData.hasLinked());
                             if (playerData.isLinked()) {
                                 sender.sendMessage(ChatColor.AQUA + "Discord ID: " + ChatColor.BOLD + playerData.getDiscordTag());
                             }
