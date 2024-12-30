@@ -80,13 +80,13 @@ public class ClaimRewardsCmd implements CommandExecutor {
                 return false;
             }
 
-            String server = PlayerData.getPlayerDataConfig(plugin, player.getUniqueId()).getString("rewardsServer");
+//            String server = PlayerData.getPlayerDataConfig(plugin, player.getUniqueId()).getString("rewardsServer");
 
-            if (server == null || !server.equalsIgnoreCase(serverName) && !server.equalsIgnoreCase("all")) {
-                player.sendMessage(ChatColor.RED + "You don't have any rewards to claim on this server!");
-                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                return false;
-            }
+//            if (server == null || !server.equalsIgnoreCase(serverName) && !server.equalsIgnoreCase("all")) {
+//                player.sendMessage(ChatColor.RED + "You don't have any rewards to claim on this server!");
+//                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+//                return false;
+//            }
 
             if (rewards == 0) {
                 player.sendMessage(ChatColor.RED + "There aren't any rewards setup yet!");

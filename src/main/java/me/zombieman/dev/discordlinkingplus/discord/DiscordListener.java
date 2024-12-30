@@ -171,8 +171,10 @@ public class DiscordListener extends ListenerAdapter {
 
                 jedis.publish("DISCORD_LINKING", "LINKED:" + uuid + ":" + event.getAuthor().getName());
 
+                String message = "✅_Successfully_**linked**_your_accounts!~~> **Minecraft:** `%minecraft%`~> **Discord:** %discord%~> **DiscordID:** `%discord-ID%`" + hasLinked;
+
                 jedis.publish("DISCORD_LINKING",
-                        "MESSAGE:" + event.getAuthor().getId() + ":✅_Successfully_**linked**_your_accounts!~~> **Minecraft:** `%minecraft%`~> **Discord:** %discord%~> **DiscordID:** `%discord-ID%`" + hasLinked
+                        "MESSAGE:" + event.getAuthor().getId() + ":" + message
                         .replace("%minecraft%", playerName)
                         .replace("%discord%", event.getAuthor().getAsMention())
                         .replace("%discord-ID%", event.getAuthor().getId()));

@@ -36,9 +36,12 @@ DiscordLogsChannelID: 1291128583263355041
 
 ServerName: Fewer
 
+# If this placeholder is "1" the players nickname and rank
+# will not be updated!
+placeholder: "example_placeholder"
+
 server:
   name: "Hub"
-  rewardsTo: "all"
 
 # %ingame-name% is minecraft name
 # %discord-name% is discord name
@@ -65,8 +68,7 @@ LinkingRewards:
     - ''
   hover: '<green>Click here to claim rewards!'
 
-  commands:
-    - give %player% diamond 120
+  commands: []
   playerCommands: []
 
 commands:

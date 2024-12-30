@@ -93,9 +93,9 @@ public class PlayerJoinListener implements Listener {
                 String server = PlayerData.getPlayerDataConfig(plugin, player.getUniqueId()).getString("rewardsServer");
                 String serverName = plugin.getConfig().getString("server.name");
 
-                if (server == null) return;
+//                if (server == null) return;
 
-                if (!server.equalsIgnoreCase(serverName) && !server.equalsIgnoreCase("all")) return;
+//                if (!server.equalsIgnoreCase(serverName) && !server.equalsIgnoreCase("all")) return;
 
                 if (!servers.contains(serverName)) {
                     String title = ChatColor.GREEN.toString() + ChatColor.BOLD + "🌟 Reward Notification! 🌟";

@@ -1,5 +1,6 @@
 package me.zombieman.dev.discordlinkingplus.manager;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
@@ -24,6 +25,10 @@ public class RankManager {
 
     public void assignRankAndNickname(Player player) throws SQLException {
         // Retrieve the player's in-game permissions for ranks
+        if (PlaceholderAPI.setPlaceholders(player, plugin.getConfig().getString("placeholder", "%fewernick_isnicked%")).equalsIgnoreCase("1")) {
+            return;
+        }
+
         Set<String> playerRanks = new HashSet<>();
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission();
