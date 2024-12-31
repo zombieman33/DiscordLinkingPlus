@@ -201,16 +201,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
                         if (!player.hasPermission("discordlinkingplus.command.link")) continue;
 
-                        player.sendMessage(MiniMessage.miniMessage().deserialize("""
-                            <green><strikethrough>                                           </strikethrough>
-                            <green>Remember to link your account!
-                            <green>/link (CLICK ME)
-                            <green><strikethrough>                                           </strikethrough>""")
-                                .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize("<green>Click to link accounts")))
-                                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/link")));
-
-
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+                        sendReminder(player);
 
                     } catch (SQLException e) {
                         plugin.getLogger().severe("Database not responding: " + e.getMessage());
@@ -219,6 +210,20 @@ public final class DiscordLinkingPlus extends JavaPlugin {
                 }
             }
         }.runTaskTimerAsynchronously(this, 0L, 20L * 60L * 40);
+    }
+
+    public void sendReminder(Player player) {
+
+        player.sendMessage(MiniMessage.miniMessage().deserialize("""
+                            <green><strikethrough>                                           </strikethrough>
+                            <green>Remember to link your account!
+                            <green>/link (CLICK ME)
+                            <green><strikethrough>                                           </strikethrough>""")
+                .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize("<green>Click to link accounts")))
+                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/link")));
+
+
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
     }
 
     public PlayerDatabase getPlayerDatabase() {

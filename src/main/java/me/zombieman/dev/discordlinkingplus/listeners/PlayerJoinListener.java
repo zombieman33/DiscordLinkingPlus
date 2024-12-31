@@ -86,6 +86,11 @@ public class PlayerJoinListener implements Listener {
         try {
 
             DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName());
+
+            if (!playerData.isLinked()) {
+                plugin.sendReminder(player);
+            }
+
             if (playerData.isLinked()) {
 
                 List<String> servers = ServerNameUtil.fromString(playerData.getServerClaimedOn());

@@ -104,7 +104,7 @@ ranks:
     update-role: true
     discordRank: 1291481074198904894
     priority: 0
-  default:
+  member:
     update-name: true
     update-role: true
     discordRank: 927172634830045273

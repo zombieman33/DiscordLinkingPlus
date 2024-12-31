@@ -110,7 +110,9 @@ public class RankManager {
                     .replace("%rank%", formattedRank)
                     .replace("%ingame-name%", player.getName())
                     .replace("%discord-name%", member.getEffectiveName())
-                    .replace("-", ". ");
+                    .replace("-", ". ")
+                    .replace("_", "")
+                    .replace("PLUS", "+");
 
             // Update the nickname if necessary
             if (!formattedNickname.equals(member.getNickname())) {
