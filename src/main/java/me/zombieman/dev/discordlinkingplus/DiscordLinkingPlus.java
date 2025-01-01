@@ -264,6 +264,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             System.err.println("API is not initialized!");
             return null;
         }
+        System.out.println("API is initialized!");
         return api;
     }
     private void initializeAPI() {
