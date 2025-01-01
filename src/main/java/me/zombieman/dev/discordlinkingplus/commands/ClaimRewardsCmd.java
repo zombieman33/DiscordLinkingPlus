@@ -55,30 +55,32 @@ public class ClaimRewardsCmd implements CommandExecutor {
 
         int rewards = commandsSize + playerCommandsSize;
 
-        try {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 
-            DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName());
+            try {
 
-            if (!playerData.isLinked()) {
-                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You have not linked your accounts yet!")
-                        .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize("<red>Click here to link your accounts!")))
-                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/discordlinkingplus:link")));
+                DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName());
 
-                player.sendActionBar(ChatColor.RED + "You need to link your accounts before running this command!");
-                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                return false;
-            }
+                if (!playerData.isLinked()) {
+                    player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You have not linked your accounts yet!")
+                            .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize("<red>Click here to link your accounts!")))
+                            .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/discordlinkingplus:link")));
 
-            List<String> servers = new ArrayList<>(ServerNameUtil.fromString(playerData.getServerClaimedOn()));
+                    player.sendActionBar(ChatColor.RED + "You need to link your accounts before running this command!");
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    return;
+                }
 
-            String serverName = plugin.getConfig().getString("server.name");
+                List<String> servers = new ArrayList<>(ServerNameUtil.fromString(playerData.getServerClaimedOn()));
 
-            if (servers.contains(serverName)) {
-                player.sendMessage(ChatColor.RED + "You have already claimed your rewards on this server!");
-                player.sendActionBar(ChatColor.RED + "You have already claimed your rewards on this server!");
-                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                return false;
-            }
+                String serverName = plugin.getConfig().getString("server.name");
+
+                if (servers.contains(serverName)) {
+                    player.sendMessage(ChatColor.RED + "You have already claimed your rewards on this server!");
+                    player.sendActionBar(ChatColor.RED + "You have already claimed your rewards on this server!");
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    return;
+                }
 
 //            String server = PlayerData.getPlayerDataConfig(plugin, player.getUniqueId()).getString("rewardsServer");
 
@@ -88,46 +90,47 @@ public class ClaimRewardsCmd implements CommandExecutor {
 //                return false;
 //            }
 
-            if (rewards == 0) {
-                player.sendMessage(ChatColor.RED + "There aren't any rewards setup yet!");
-                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                return false;
+                if (rewards == 0) {
+                    player.sendMessage(ChatColor.RED + "There aren't any rewards setup yet!");
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    return;
+                }
+
+                servers.add(serverName);
+
+                plugin.getPlayerDatabase().updateServers(player.getUniqueId(), ServerNameUtil.toString(servers));
+
+                for (String c : commands) {
+                    c = RewardsManager.commandReplacements(c, player);
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), c);
+                }
+
+                for (String c : playerCommands) {
+                    c = RewardsManager.commandReplacements(c, player);
+                    player.performCommand(c);
+                }
+
+                String title = ChatColor.GREEN.toString() + ChatColor.BOLD + "🌟 Reward Notification! 🌟";
+                String message = ChatColor.GREEN + "🎉 Congratulations! You have claimed " + ChatColor.YELLOW + rewards + ChatColor.GREEN + " rewards! 🎊";
+                String actionBarMessage = ChatColor.AQUA + "✨ You claimed " + ChatColor.YELLOW + rewards + ChatColor.AQUA + " rewards! ✨";
+
+                player.sendTitle(title, "", 10, 70, 20);
+
+                player.sendMessage(message);
+
+                player.sendActionBar(actionBarMessage);
+
+                plugin.getRankManager().assignRankAndNickname(player);
+
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+
+                LoggingManager.sendEmbedMessage("Claimed Rewards", player.getName(), playerData.getDiscordTag(), player.getUniqueId().toString(), null, "Claimed Rewards!\n\n> Server: **" + serverName + "**\n> Has Claimed On: **" + servers + "**", Color.ORANGE);
+
+            } catch (SQLException e) {
+                player.sendMessage(ChatColor.RED + "There was an error while connecting to the database, please try again later.");
+                plugin.getLogger().severe("Database not responding: " + e.getMessage());
             }
-
-            servers.add(serverName);
-
-            plugin.getPlayerDatabase().updateServers(player.getUniqueId(), ServerNameUtil.toString(servers));
-
-            for (String c : commands) {
-                c = RewardsManager.commandReplacements(c, player);
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), c);
-            }
-
-            for (String c : playerCommands) {
-                c = RewardsManager.commandReplacements(c, player);
-                player.performCommand(c);
-            }
-
-            String title = ChatColor.GREEN.toString() + ChatColor.BOLD + "🌟 Reward Notification! 🌟";
-            String message = ChatColor.GREEN + "🎉 Congratulations! You have claimed " + ChatColor.YELLOW + rewards + ChatColor.GREEN + " rewards! 🎊";
-            String actionBarMessage = ChatColor.AQUA + "✨ You claimed " + ChatColor.YELLOW + rewards + ChatColor.AQUA + " rewards! ✨";
-
-            player.sendTitle(title, "", 10, 70, 20);
-
-            player.sendMessage(message);
-
-            player.sendActionBar(actionBarMessage);
-
-            plugin.getRankManager().assignRankAndNickname(player);
-
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
-
-            LoggingManager.sendEmbedMessage("Claimed Rewards", player.getName(), playerData.getDiscordTag(), player.getUniqueId().toString(), null, "Claimed Rewards!\n\n> Server: **" + serverName + "**\n> Has Claimed On: **" + servers + "**", Color.ORANGE);
-
-        } catch (SQLException e) {
-            player.sendMessage(ChatColor.RED + "There was an error while connecting to the database, please try again later.");
-            plugin.getLogger().severe("Database not responding: " + e.getMessage());
-        }
+        });
 
         return true;
     }

@@ -51,8 +51,6 @@ public class PlayerDatabase {
     public DiscordLinkingData getPlayerData(UUID uuid) throws SQLException {
         DiscordLinkingData data = dataDao.queryForId(uuid.toString());
 
-        System.out.println("data: " + data);
-
         if (data == null) {
             data = new DiscordLinkingData();
             data.setUuid(uuid.toString());
@@ -61,8 +59,6 @@ public class PlayerDatabase {
             data.setHasLinked(false);
             dataDao.create(data);
         }
-
-        System.out.println("Data #2: " + data);
 
         return data;
     }
@@ -111,47 +107,30 @@ public class PlayerDatabase {
     }
 
     public UUID getUuidByUsername(String username) throws SQLException {
-        System.out.println("PlayerDatabase.getUuidByUsername");
-
         List<DiscordLinkingData> result = dataDao.queryForEq("username", username);
-        System.out.println("Result: " + result);
 
         if (!result.isEmpty()) {
-            System.out.println(UUID.fromString(result.get(0).getUuid()));
             return UUID.fromString(result.get(0).getUuid());
         }
-
-        System.out.println("Is null");
         return null;
     }
     public UUID getUuidByDiscordTag(String discordTag) throws SQLException {
-        System.out.println("PlayerDatabase.getUuidByDiscordTag");
         List<DiscordLinkingData> result = dataDao.queryForEq("discordTag", discordTag);
-
-        System.out.println("Result: " + result);
 
         if (!result.isEmpty()) {
             System.out.println(UUID.fromString(result.get(0).getUuid()));
             return UUID.fromString(result.get(0).getUuid());
         }
-
-        System.out.println("NULL");
 
         return null;
     }
 
     public String getUsernameByDiscordTag(String discordTag) throws SQLException {
-        System.out.println("PlayerDatabase.getUsernameByDiscordTag");
         List<DiscordLinkingData> result = dataDao.queryForEq("discordTag", discordTag);
 
-        System.out.println("Result: " + result);
-
         if (!result.isEmpty()) {
-            System.out.println("Not null: " + result.get(0).getUsername());
             return result.get(0).getUsername();
         }
-
-        System.out.println("Null");
 
         return null;
     }
