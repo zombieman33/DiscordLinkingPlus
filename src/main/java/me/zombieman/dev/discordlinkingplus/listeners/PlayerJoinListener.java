@@ -83,49 +83,51 @@ public class PlayerJoinListener implements Listener {
             return;
         }
 
-        try {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
 
-            DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName());
+                DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName());
 
-            if (!playerData.isLinked()) {
-                plugin.sendReminder(player);
-            }
+                if (!playerData.isLinked()) {
+                    plugin.sendReminder(player);
+                }
 
-            if (playerData.isLinked()) {
+                if (playerData.isLinked()) {
 
-                List<String> servers = ServerNameUtil.fromString(playerData.getServerClaimedOn());
+                    List<String> servers = ServerNameUtil.fromString(playerData.getServerClaimedOn());
 
-                String server = PlayerData.getPlayerDataConfig(plugin, player.getUniqueId()).getString("rewardsServer");
-                String serverName = plugin.getConfig().getString("server.name");
+//                String server = PlayerData.getPlayerDataConfig(plugin, player.getUniqueId()).getString("rewardsServer");
+                    String serverName = plugin.getConfig().getString("server.name");
 
 //                if (server == null) return;
 
 //                if (!server.equalsIgnoreCase(serverName) && !server.equalsIgnoreCase("all")) return;
 
-                if (!servers.contains(serverName)) {
-                    String title = ChatColor.GREEN.toString() + ChatColor.BOLD + "🌟 Reward Notification! 🌟";
-                    String actionBarMessage = ChatColor.AQUA + "✨ You can claim " + ChatColor.YELLOW + rewards + ChatColor.AQUA + "! ✨";
+                    if (!servers.contains(serverName)) {
+                        String title = ChatColor.GREEN.toString() + ChatColor.BOLD + "🌟 Reward Notification! 🌟";
+                        String actionBarMessage = ChatColor.AQUA + "✨ You can claim " + ChatColor.YELLOW + rewards + ChatColor.AQUA + "! ✨";
 
-                    player.sendTitle(title, "", 10, 70, 20);
+                        player.sendTitle(title, "", 10, 70, 20);
 
-                    if (!plugin.getConfig().getStringList("LinkingRewards.message").isEmpty()) {
-                        for (String message : plugin.getConfig().getStringList("LinkingRewards.message")) {
-                            message = message.replace("%reward-amount%", String.valueOf(rewards));
-                            player.sendMessage(MiniMessage.miniMessage().deserialize(message)
-                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/claimrewards"))
-                                    .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("LinkingRewards.hover", "<green>Click here to claim rewards!")))));
+                        if (!plugin.getConfig().getStringList("LinkingRewards.message").isEmpty()) {
+                            for (String message : plugin.getConfig().getStringList("LinkingRewards.message")) {
+                                message = message.replace("%reward-amount%", String.valueOf(rewards));
+                                player.sendMessage(MiniMessage.miniMessage().deserialize(message)
+                                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/claimrewards"))
+                                        .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("LinkingRewards.hover", "<green>Click here to claim rewards!")))));
+                            }
                         }
+
+                        player.sendActionBar(actionBarMessage);
+
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
                     }
 
-                    player.sendActionBar(actionBarMessage);
-
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
                 }
 
+            } catch (SQLException e) {
+                plugin.getLogger().severe("Database not responding: " + e.getMessage());
             }
-
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Database not responding: " + e.getMessage());
-        }
+        });
     }
 }
