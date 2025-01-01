@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class DiscordLinkingPlus extends JavaPlugin {
     private RankManager rankManager;
-    private static API api;
+    private API api;
     private PlayerDatabase playerDatabase;
     private CodeManager codeManager;
     private JedisPool jedisPool;
