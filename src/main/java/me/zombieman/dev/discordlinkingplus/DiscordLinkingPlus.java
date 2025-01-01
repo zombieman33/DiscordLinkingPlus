@@ -50,10 +50,13 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     private volatile boolean running = true;
 
     private LinkPlaceholders linkPlaceholders;
+    private static DiscordLinkingPlus instance;
     @Override
     public void onEnable() {
         // Plugin startup logic
         saveDefaultConfig();
+
+        instance = this;
 
         PlayerData.initDataFolder(this);
 
@@ -274,6 +277,9 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         }
         api = new API(this);
         getLogger().info("API initialized successfully.");
+    }
+    public static DiscordLinkingPlus getInstance() {
+        return instance;
     }
     public void assignRoleToAllMembers() {
         Guild guild = getGuild(); // Retrieve the guild using your method
