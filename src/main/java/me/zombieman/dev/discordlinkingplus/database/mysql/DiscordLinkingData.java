@@ -33,13 +33,19 @@ public class DiscordLinkingData {
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
-    public String getDiscordTag() { return discordTag; }
+    public String getDiscordTag() {
+        System.out.println("Discord ID: " + discordTag);
+        return discordTag;
+    }
     public void setDiscordTag(String discordTag) { this.discordTag = discordTag; }
 
     public String getServerClaimedOn() { return serverClaimedOn; }
     public void setServerClaimedOn(String serverClaimedOn) { this.serverClaimedOn = serverClaimedOn; }
 
-    public boolean isLinked() { return isLinked; }
+    public boolean isLinked() {
+        System.out.println("Is linked: " + isLinked);
+        return isLinked;
+    }
     public void setLinked(boolean linked) { isLinked = linked; }
 
     public boolean hasLinked() { return hasLinked; }
