@@ -141,7 +141,9 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         new LoggingManager(this);
         new ServerNameUtil();
 
-        api = new API(this);
+        initializeAPI();
+
+//        api = new API(this);
 
         // Placeholders
         linkPlaceholders = new LinkPlaceholders(this);
@@ -257,12 +259,20 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     public boolean isMainServer() {
         return getConfig().getBoolean("MainServer", true);
     }
-    public static API getApi() {
+    public API getApi() {
         if (api == null) {
             System.err.println("API is not initialized!");
             return null;
         }
         return api;
+    }
+    private void initializeAPI() {
+        if (api != null) {
+            getLogger().warning("API is already initialized!");
+            return;
+        }
+        api = new API(this);
+        getLogger().info("API initialized successfully.");
     }
     public void assignRoleToAllMembers() {
         Guild guild = getGuild(); // Retrieve the guild using your method
