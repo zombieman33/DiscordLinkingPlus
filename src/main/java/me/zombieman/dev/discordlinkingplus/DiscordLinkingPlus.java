@@ -258,6 +258,10 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         return getConfig().getBoolean("MainServer", true);
     }
     public static API getApi() {
+        if (api == null) {
+            System.err.println("API is not initialized!");
+            return null;
+        }
         return api;
     }
     public void assignRoleToAllMembers() {
