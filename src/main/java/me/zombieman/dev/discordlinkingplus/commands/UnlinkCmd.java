@@ -8,7 +8,9 @@ import me.zombieman.dev.discordlinkingplus.manager.RewardsManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -79,6 +81,22 @@ public class UnlinkCmd implements CommandExecutor {
                     return;
                 }
 
+                String ID = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName()).getDiscordTag();
+
+                try {
+                    Guild.Ban ban = plugin.getGuild().retrieveBan(UserSnowflake.fromId(ID)).complete();
+
+                    if (ban != null) {
+                        player.sendMessage(ChatColor.RED.toString() + ChatColor.STRIKETHROUGH + "                                            ");
+                        player.sendMessage(ChatColor.RED + "You cannot unlink your accounts while banned!");
+                        player.sendMessage(ChatColor.RED.toString() + ChatColor.STRIKETHROUGH + "                                            ");
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+                        return;
+                    }
+                } catch (ErrorResponseException e) {
+                    if (e.getErrorCode() == 10026) {}
+                }
+
                 plugin.getRankManager().removeRank(discordTag, false);
                 plugin.getRankManager().addRank(discordTag, "unLinked");
 
@@ -97,6 +115,18 @@ public class UnlinkCmd implements CommandExecutor {
 //                                .replace("%discord-ID%", member.getUser().getId())).queue();
 //                    });
 //                }
+
+
+                Member member = plugin.getGuild().retrieveMemberById(ID).complete();
+                if (member.isTimedOut()) {
+                    player.sendMessage(ChatColor.RED.toString() + ChatColor.STRIKETHROUGH + "                                            ");
+                    player.sendMessage(ChatColor.RED + "You cannot unlink your accounts while timed out!");
+                    player.sendMessage(ChatColor.RED.toString() + ChatColor.STRIKETHROUGH + "                                            ");
+
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+                    return;
+                }
+
 
                 LoggingManager.sendEmbedMessage("Successfully Unlinked", player.getName(), discordTag, player.getUniqueId().toString(), null, "Unlinked with /unlink!", Color.RED);
 

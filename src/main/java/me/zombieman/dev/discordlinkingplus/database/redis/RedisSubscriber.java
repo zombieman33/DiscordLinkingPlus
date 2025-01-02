@@ -102,17 +102,36 @@ public class RedisSubscriber extends JedisPubSub {
 
         if (!plugin.getConfig().getBoolean("MainServer", false)) return;
 
+        // Replace custom placeholders with the actual message format
         message = message.replace("_", " ");
         message = message.replace("~", "\n");
 
-        Member member = plugin.getGuild().retrieveMemberById(discordID).complete();
+        try {
+            Member member = plugin.getGuild().retrieveMemberById(discordID).complete();
 
-        String finalMessage = message;
-//        System.out.println(finalMessage);
-        member.getUser().openPrivateChannel().queue(privateChannel -> {
-            privateChannel.sendMessage(finalMessage).queue();
-        });
+            if (member == null) {
+                plugin.getLogger().warning("Member with ID " + discordID + " could not be found in the guild.");
+                return;
+            }
+
+            String finalMessage = message;
+            member.getUser().openPrivateChannel().queue(
+                    privateChannel -> {
+                        privateChannel.sendMessage(finalMessage).queue(
+                                success -> plugin.getLogger().info("Message sent to " + discordID),
+                                error -> plugin.getLogger().warning("Failed to send DM to " + discordID + ": " + error.getMessage())
+                        );
+                    },
+                    error -> {
+                        plugin.getLogger().warning("Could not open private channel for user " + discordID + ": " + error.getMessage());
+                    }
+            );
+        } catch (Exception e) {
+            plugin.getLogger().severe("Error handling message for user " + discordID + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     private void handleUnlinked(UUID unlinkedUUID, String unlinkedBy) throws SQLException {
 
