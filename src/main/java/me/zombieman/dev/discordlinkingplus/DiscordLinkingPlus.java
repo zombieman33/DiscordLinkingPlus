@@ -6,10 +6,13 @@ import me.zombieman.dev.discordlinkingplus.commands.ClaimRewardsCmd;
 import me.zombieman.dev.discordlinkingplus.commands.LinkCmd;
 import me.zombieman.dev.discordlinkingplus.commands.UnlinkCmd;
 import me.zombieman.dev.discordlinkingplus.data.PlayerData;
+import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordDatabase;
 import me.zombieman.dev.discordlinkingplus.database.mysql.PlayerDatabase;
 import me.zombieman.dev.discordlinkingplus.database.redis.RedisSubscriber;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
+import me.zombieman.dev.discordlinkingplus.discord.DiscordBanListener;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordListener;
+import me.zombieman.dev.discordlinkingplus.discord.DiscordTimeoutListener;
 import me.zombieman.dev.discordlinkingplus.listeners.PlayerJoinListener;
 import me.zombieman.dev.discordlinkingplus.manager.CodeManager;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
@@ -20,8 +23,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -30,12 +33,11 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +45,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     private RankManager rankManager;
     private API api;
     private PlayerDatabase playerDatabase;
+    private DiscordDatabase discordDatabase;
     private CodeManager codeManager;
     private JedisPool jedisPool;
     private Thread redisSubscriberThread;
@@ -78,6 +81,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             String password = getConfig().getString("database.mysql.password");
             playerDatabase = new PlayerDatabase(url, username, password);
             codeManager = new CodeManager(url, username, password);
+            discordDatabase = new DiscordDatabase(url, username, password);
             getLogger().info("Connected to MySQL database");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -120,7 +124,14 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
         // Initialize Discord Bot
         DiscordBot.getInstance(getConfig().getString("DiscordBotToken"), getConfig().getString("ServerName", "n/a"))
-                .addEventListener(new DiscordListener(this));
+                .addEventListener(
+                        new DiscordListener(this),
+                        new DiscordBanListener(this),
+                        new DiscordTimeoutListener(this));
+
+        // Listeners
+//        DiscordBot.getBot().addEventListener(new DiscordBanListener(this));
+//        DiscordBot.getBot().addEventListener(new DiscordTimeoutListener(this));
 
         getCommand("claimrewards").setExecutor(new ClaimRewardsCmd(this));
         getCommand("link").setExecutor(new LinkCmd(this));
@@ -185,6 +196,14 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             playerDatabase.close();
             getLogger().info("MySQL database connection closed.");
         }
+        if (codeManager != null) {
+            codeManager.close();
+            getLogger().info("MySQL code database connection closed.");
+        }
+        if (discordDatabase != null) {
+            discordDatabase.close();
+            getLogger().info("MySQL discord database connection closed.");
+        }
 
         // Plugin shutdown logic
         if (DiscordBot.getBot() != null) {
@@ -234,7 +253,9 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     public PlayerDatabase getPlayerDatabase() {
         return playerDatabase;
     }
-
+    public DiscordDatabase getDiscordDatabase() {
+        return discordDatabase;
+    }
     public Jedis getJedisResource() {
         return jedisPool.getResource();
     }
@@ -279,42 +300,5 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     }
     public static DiscordLinkingPlus getInstance() {
         return instance;
-    }
-    public void assignRoleToAllMembers() {
-        Guild guild = getGuild(); // Retrieve the guild using your method
-        if (guild == null) {
-            getLogger().severe("Guild is null! Cannot assign roles.");
-            return;
-        }
-
-        // Retrieve the role by ID
-        Role role = guild.getRoleById("1291481026979172423");
-        if (role == null) {
-            getLogger().severe("Role with ID 1291481026979172423 not found in the guild!");
-            return;
-        }
-
-        // Assign the role to each member
-        guild.loadMembers().onSuccess(members -> {
-            for (Member member : members) {
-                if (member.getRoles().contains(role)) {
-                    continue;
-                }
-
-                // Assign the role
-                guild.addRoleToMember(member, role).queue(
-                        success -> getLogger().info("Assigned role to: " + member.getEffectiveName()),
-                        error -> getLogger().warning("Failed to assign role to: " + member.getEffectiveName() + " - " + error.getMessage())
-                );
-
-                try {
-                    TimeUnit.MILLISECONDS.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    getLogger().warning("Thread interrupted during role assignment.");
-                    break;
-                }
-            }
-        }).onError(error -> getLogger().severe("Failed to load members: " + error.getMessage()));
     }
 }

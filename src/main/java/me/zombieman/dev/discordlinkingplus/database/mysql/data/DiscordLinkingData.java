@@ -1,4 +1,4 @@
-package me.zombieman.dev.discordlinkingplus.database.mysql;
+package me.zombieman.dev.discordlinkingplus.database.mysql.data;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;

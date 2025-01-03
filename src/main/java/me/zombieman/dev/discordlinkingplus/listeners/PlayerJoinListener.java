@@ -1,12 +1,10 @@
 package me.zombieman.dev.discordlinkingplus.listeners;
 
 
-import io.papermc.paper.event.player.AsyncChatCommandDecorateEvent;
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import me.zombieman.dev.discordlinkingplus.data.PlayerData;
-import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordLinkingData;
+import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
-import me.zombieman.dev.discordlinkingplus.manager.RankManager;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -18,13 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.checkerframework.checker.units.qual.A;
 
 import java.awt.*;
-import java.nio.channels.Channel;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
 

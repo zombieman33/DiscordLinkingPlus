@@ -62,6 +62,8 @@ public class LinkPlaceholders extends PlaceholderExpansion {
                     return isPlayerLinked(uuid) ? "1" : "0";
                 case "discordid":
                     if (plugin.getPlayerDatabase().getPlayerData(uuid).isLinked()) return discordTag;
+                case "claimedrewards":
+                    if (plugin.getPlayerDatabase().getPlayerData(uuid).isLinked()) return plugin.getPlayerDatabase().getPlayerData(uuid).getServerClaimedOn();
 
                     return "n/a";
                 case "discordname":

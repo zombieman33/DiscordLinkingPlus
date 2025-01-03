@@ -1,29 +1,25 @@
 package me.zombieman.dev.discordlinkingplus.commands;
 
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
-import me.zombieman.dev.discordlinkingplus.data.PlayerData;
-import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordLinkingData;
+import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
 import me.zombieman.dev.discordlinkingplus.manager.RewardsManager;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class ClaimRewardsCmd implements CommandExecutor {
     private final DiscordLinkingPlus plugin;
@@ -98,17 +94,21 @@ public class ClaimRewardsCmd implements CommandExecutor {
 
                 servers.add(serverName);
 
+                Bukkit.getScheduler().runTask(plugin, () -> {
+
+                    for (String c : commands) {
+                        c = RewardsManager.commandReplacements(c, player);
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), c);
+                    }
+
+                    for (String c : playerCommands) {
+                        c = RewardsManager.commandReplacements(c, player);
+                        player.performCommand(c);
+                    }
+
+                });
+
                 plugin.getPlayerDatabase().updateServers(player.getUniqueId(), ServerNameUtil.toString(servers));
-
-                for (String c : commands) {
-                    c = RewardsManager.commandReplacements(c, player);
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), c);
-                }
-
-                for (String c : playerCommands) {
-                    c = RewardsManager.commandReplacements(c, player);
-                    player.performCommand(c);
-                }
 
                 String title = ChatColor.GREEN.toString() + ChatColor.BOLD + "🌟 Reward Notification! 🌟";
                 String message = ChatColor.GREEN + "🎉 Congratulations! You have claimed " + ChatColor.YELLOW + rewards + ChatColor.GREEN + " rewards! 🎊";

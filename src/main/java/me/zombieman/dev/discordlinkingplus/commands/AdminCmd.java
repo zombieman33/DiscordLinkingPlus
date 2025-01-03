@@ -1,17 +1,8 @@
 package me.zombieman.dev.discordlinkingplus.commands;
 
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
-import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordLinkingData;
-import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
-import me.zombieman.dev.discordlinkingplus.manager.CodeManager;
+import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -131,6 +122,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
             Player player = (Player) sender;
             if (!player.hasPermission("discordlinkingplus.command.admin")) return completions;
         }
+
 
         if (args.length == 1) {
             completions.add("unlink");

@@ -4,8 +4,10 @@ import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
 import me.zombieman.dev.discordlinkingplus.manager.RewardsManager;
 import net.dv8tion.jda.api.entities.Member;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.MusicInstrument;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import redis.clients.jedis.JedisPubSub;
@@ -25,7 +27,6 @@ public class RedisSubscriber extends JedisPubSub {
         if (!plugin.isEnabled()) {
             return;
         }
-        System.out.println(message);
 
         String[] parts = message.split(":", 3);
         String action = parts[0];
@@ -70,10 +71,35 @@ public class RedisSubscriber extends JedisPubSub {
                     handleMessage(discordID, msg);
                 }
                 break;
+            case "MINECRAFT_MESSAGE":
+                if (parts.length >= 3) {
+                    String uuid = parts[1];
+                    String msg = parts[2];
+                    handleMinecraftMessage(uuid, msg);
+                }
+                break;
             default:
                 plugin.getLogger().warning("Received unrecognized message: " + message);
                 break;
         }
+    }
+
+    private void handleMinecraftMessage(String uuid, String msg) {
+        if (Bukkit.getPlayer(UUID.fromString(uuid)) == null) return;
+
+        Player player = Bukkit.getPlayer(UUID.fromString(uuid));
+
+        player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                       ");
+
+        if (msg.contains("&")) {
+            player.sendMessage(msg);
+        } else if (msg.contains("<#")) {
+            player.sendMessage(MiniMessage.miniMessage().deserialize(msg));
+        } else {
+            player.sendMessage(ChatColor.AQUA + msg);
+        }
+        player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                       ");
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
     }
 
     private void handleLinked(UUID linkedUUID, String discordName) {

@@ -6,7 +6,7 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
-import me.zombieman.dev.discordlinkingplus.database.mysql.CodeData;
+import me.zombieman.dev.discordlinkingplus.database.mysql.data.CodeData;
 import org.bukkit.Bukkit;
 
 import java.sql.SQLException;

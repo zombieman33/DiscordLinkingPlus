@@ -180,7 +180,7 @@ public class DiscordListener extends ListenerAdapter {
                         .replace("%discord-ID%", event.getAuthor().getId()));
 
                 if (!plugin.getPlayerDatabase().getPlayerData(uuid).hasLinked()) {
-                    System.out.println("Sending rewards");
+//                    System.out.println("Sending rewards");
                     jedis.publish("DISCORD_LINKING", "REWARDS:" + uuid + ":" + plugin.getConfig().getString("server.rewardsTo"));
                 }
             }
