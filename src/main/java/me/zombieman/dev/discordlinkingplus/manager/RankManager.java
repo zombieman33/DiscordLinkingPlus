@@ -103,16 +103,16 @@ public class RankManager {
             String staffPermission = plugin.getConfig().getString("ranks." + highestPriorityRank + ".icon-permission", "");
 
             if (isStaff && (staffPermission == null || player.hasPermission(staffPermission))) {
-                formattedRank = staffPrefix + formattedRank;
+                formattedRank = staffPrefix + formattedRank
+                        .replace("-", ". ")
+                        .replace("_", "")
+                        .replace("PLUS", "+");
             }
 
             String formattedNickname = nicknameFormat
                     .replace("%rank%", formattedRank)
                     .replace("%ingame-name%", player.getName())
-                    .replace("%discord-name%", member.getEffectiveName())
-                    .replace("-", ". ")
-                    .replace("_", "")
-                    .replace("PLUS", "+");
+                    .replace("%discord-name%", member.getEffectiveName());
 
             // Update the nickname if necessary
             if (!formattedNickname.equals(member.getNickname())) {
