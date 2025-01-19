@@ -6,6 +6,7 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
+import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -145,5 +146,35 @@ public class PlayerDatabase {
         return false;
     }
 
+    public void resetClaimedServer(String server) throws SQLException {
+        List<DiscordLinkingData> allData = dataDao.queryForAll();
 
+        System.out.println(server);
+
+        for (DiscordLinkingData data : allData) {
+            String servers = data.getServerClaimedOn();
+
+            if (servers == null) continue;
+
+            System.out.println(servers);
+            List<String> serverList = new ArrayList<>(ServerNameUtil.fromString(servers));
+
+            System.out.println(serverList);
+
+            if (serverList.contains(server)) {
+                System.out.println("It contains");
+                System.out.println("List:");
+                System.out.println(serverList);
+
+                System.out.println("Server: " +server);
+                serverList.remove(server);
+                String updatedServers = ServerNameUtil.toString(serverList);
+
+                data.setServerClaimedOn(updatedServers);
+                dataDao.update(data);
+            }
+        }
+
+        System.out.println("All claims for server '" + server + "' have been reset.");
+    }
 }

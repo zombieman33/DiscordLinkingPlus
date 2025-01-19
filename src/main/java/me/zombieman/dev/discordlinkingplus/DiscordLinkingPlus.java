@@ -6,8 +6,10 @@ import me.zombieman.dev.discordlinkingplus.commands.ClaimRewardsCmd;
 import me.zombieman.dev.discordlinkingplus.commands.LinkCmd;
 import me.zombieman.dev.discordlinkingplus.commands.UnlinkCmd;
 import me.zombieman.dev.discordlinkingplus.data.PlayerData;
+import me.zombieman.dev.discordlinkingplus.data.cache.ServerListCache;
 import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordDatabase;
 import me.zombieman.dev.discordlinkingplus.database.mysql.PlayerDatabase;
+import me.zombieman.dev.discordlinkingplus.database.mysql.ServerDatabase;
 import me.zombieman.dev.discordlinkingplus.database.redis.RedisSubscriber;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordBanListener;
@@ -39,6 +41,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public final class DiscordLinkingPlus extends JavaPlugin {
@@ -52,6 +55,10 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     private JDA jda;
     private volatile boolean running = true;
 
+    private ServerListCache serverListCache;
+    private ServerDatabase serverDatabase;
+
+    public final UUID sessionID = UUID.randomUUID();
     private LinkPlaceholders linkPlaceholders;
     private static DiscordLinkingPlus instance;
     @Override
@@ -82,6 +89,8 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             playerDatabase = new PlayerDatabase(url, username, password);
             codeManager = new CodeManager(url, username, password);
             discordDatabase = new DiscordDatabase(url, username, password);
+            serverDatabase = new ServerDatabase(this, url, username, password);
+            serverListCache = new ServerListCache(serverDatabase);
             getLogger().info("Connected to MySQL database");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -300,5 +309,15 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     }
     public static DiscordLinkingPlus getInstance() {
         return instance;
+    }
+
+
+
+    public ServerDatabase getServerDatabase() {
+        return serverDatabase;
+    }
+
+    public ServerListCache getServerListCache() {
+        return serverListCache;
     }
 }
