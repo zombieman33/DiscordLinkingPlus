@@ -21,8 +21,14 @@ public class LuckpermsManager {
         System.out.println("Initialized luckperms manager!");
     }
 
-    private void registerListener() {
-        luckPerms.getEventBus().subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
+    public void registerListener() {
+        if (Bukkit.getServer().isPrimaryThread()) {
+            luckPerms.getEventBus().subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
+        } else {
+            Bukkit.getScheduler().runTask(plugin, () ->
+                    luckPerms.getEventBus().subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate)
+            );
+        }
     }
 
     private void onUserDataRecalculate(UserDataRecalculateEvent event) {
