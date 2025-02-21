@@ -96,6 +96,12 @@ ranksToAdd:
     discordRanks:
       - 1291481026979172423
 
+boosting:
+  started:
+    - lp user %player% parent add booster
+  stopped:
+    - lp user %player% parent remove booster
+
 # discordlinkingplus.rank.<rank name>
 
 ranks:

@@ -11,13 +11,11 @@ import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordDatabase;
 import me.zombieman.dev.discordlinkingplus.database.mysql.PlayerDatabase;
 import me.zombieman.dev.discordlinkingplus.database.mysql.ServerDatabase;
 import me.zombieman.dev.discordlinkingplus.database.redis.RedisSubscriber;
-import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
-import me.zombieman.dev.discordlinkingplus.discord.DiscordBanListener;
-import me.zombieman.dev.discordlinkingplus.discord.DiscordListener;
-import me.zombieman.dev.discordlinkingplus.discord.DiscordTimeoutListener;
+import me.zombieman.dev.discordlinkingplus.discord.*;
 import me.zombieman.dev.discordlinkingplus.listeners.PlayerJoinListener;
 import me.zombieman.dev.discordlinkingplus.manager.CodeManager;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
+import me.zombieman.dev.discordlinkingplus.manager.LuckpermsManager;
 import me.zombieman.dev.discordlinkingplus.manager.RankManager;
 import me.zombieman.dev.discordlinkingplus.placeholders.LinkPlaceholders;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
@@ -80,6 +78,16 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+        // Check for Luckperms
+        if (getServer().getPluginManager().getPlugin("Luckperms") == null) {
+            getLogger().warning("-----------------------------------------");
+            getLogger().warning("WARNING");
+            getLogger().warning("Luckperms plugin is not installed!");
+            getLogger().warning(this.getPluginMeta().getName() + " is now being disabled!");
+            getLogger().warning("-----------------------------------------");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
         // Initialize MySQL connection
         try {
@@ -136,7 +144,8 @@ public final class DiscordLinkingPlus extends JavaPlugin {
                 .addEventListener(
                         new DiscordListener(this),
                         new DiscordBanListener(this),
-                        new DiscordTimeoutListener(this));
+                        new DiscordTimeoutListener(this),
+                        new BoostListener(this));
 
         // Listeners
 //        DiscordBot.getBot().addEventListener(new DiscordBanListener(this));
@@ -163,6 +172,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
         new LoggingManager(this);
         new ServerNameUtil();
+        new LuckpermsManager(this);
 
         initializeAPI();
 

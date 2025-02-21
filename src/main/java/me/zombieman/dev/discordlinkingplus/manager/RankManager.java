@@ -25,6 +25,9 @@ public class RankManager {
 
     public void assignRankAndNickname(Player player) throws SQLException {
         // Retrieve the player's in-game permissions for ranks
+
+        if (player == null) return;
+
         if (PlaceholderAPI.setPlaceholders(player, plugin.getConfig().getString("placeholder", "%fewernick_isnicked%")).equalsIgnoreCase("1")) {
             return;
         }

@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -96,6 +97,13 @@ public class RewardsManager {
         command = command.replace("%player's uuid%", player.getUniqueId().toString());
         command = command.replace("%players uuid%", player.getUniqueId().toString());
         command = command.replace("%uuid%", player.getUniqueId().toString());
+        return command;
+    }
+    @NotNull
+    public static String commandReplacementsUUID(String command, UUID uuid) {
+        command = command.replace("%player's uuid%", uuid.toString());
+        command = command.replace("%players uuid%", uuid.toString());
+        command = command.replace("%uuid%", uuid.toString());
         return command;
     }
 
