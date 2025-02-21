@@ -101,6 +101,7 @@ public class RewardsManager {
     }
     @NotNull
     public static String commandReplacementsUUID(String command, UUID uuid) {
+        command = command.replace("%player%", uuid.toString());
         command = command.replace("%player's uuid%", uuid.toString());
         command = command.replace("%players uuid%", uuid.toString());
         command = command.replace("%uuid%", uuid.toString());
