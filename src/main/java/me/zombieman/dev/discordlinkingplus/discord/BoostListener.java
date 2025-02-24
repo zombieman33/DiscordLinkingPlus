@@ -40,6 +40,8 @@ public class BoostListener extends ListenerAdapter {
                 String id = event.getUser().getId();
                 UUID uuid = plugin.getPlayerDatabase().getUuidByDiscordTag(id);
 
+                if (uuid == null) return;
+
                 String stopped = "stopped";
 
                 boolean isOnline = Bukkit.getPlayer(uuid) != null;

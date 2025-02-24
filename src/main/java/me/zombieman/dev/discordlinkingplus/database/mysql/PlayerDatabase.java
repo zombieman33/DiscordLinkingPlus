@@ -6,6 +6,7 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
+import me.zombieman.dev.discordlinkingplus.database.mysql.data.statistics.LinkStatisticsData;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
 
 import java.sql.SQLException;
@@ -177,4 +178,32 @@ public class PlayerDatabase {
 
         System.out.println("All claims for server '" + server + "' have been reset.");
     }
+    public void populateLinkStatisticsFromDiscordData(Dao<LinkStatisticsData, String> statisticsDao) throws SQLException {
+        List<DiscordLinkingData> linkedUsers = dataDao.queryForEq("isLinked", true);
+
+        for (DiscordLinkingData discordData : linkedUsers) {
+            UUID uuid = UUID.fromString(discordData.getUuid());
+
+            LinkStatisticsData statisticsData = statisticsDao.queryForId(uuid.toString());
+
+            if (statisticsData == null) {
+                statisticsData = new LinkStatisticsData();
+                statisticsData.setUuid(uuid.toString());
+                statisticsData.setTotalLinkedTime(0);
+                statisticsData.setTimesLinked(1);
+                statisticsData.setLastLinkedTime(System.currentTimeMillis());
+                statisticsDao.create(statisticsData);
+                System.out.println("Created new statistics for user: " + discordData.getUsername() + " (UUID: " + uuid + ")");
+            } else {
+                statisticsData.setTimesLinked(statisticsData.getTimesLinked() + 1);
+                statisticsData.setLastLinkedTime(System.currentTimeMillis());
+                statisticsDao.update(statisticsData);
+                System.out.println("Updated statistics for user: " + discordData.getUsername() + " (UUID: " + uuid + ")");
+            }
+        }
+
+        System.out.println("Populated link statistics for all linked users.");
+    }
+
+
 }

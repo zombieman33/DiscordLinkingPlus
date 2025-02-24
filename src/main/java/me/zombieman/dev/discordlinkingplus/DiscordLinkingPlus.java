@@ -10,13 +10,11 @@ import me.zombieman.dev.discordlinkingplus.data.cache.ServerListCache;
 import me.zombieman.dev.discordlinkingplus.database.mysql.DiscordDatabase;
 import me.zombieman.dev.discordlinkingplus.database.mysql.PlayerDatabase;
 import me.zombieman.dev.discordlinkingplus.database.mysql.ServerDatabase;
+import me.zombieman.dev.discordlinkingplus.database.mysql.statistics.LinkStatisticsDatabase;
 import me.zombieman.dev.discordlinkingplus.database.redis.RedisSubscriber;
 import me.zombieman.dev.discordlinkingplus.discord.*;
 import me.zombieman.dev.discordlinkingplus.listeners.PlayerJoinListener;
-import me.zombieman.dev.discordlinkingplus.manager.CodeManager;
-import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
-import me.zombieman.dev.discordlinkingplus.manager.LuckpermsManager;
-import me.zombieman.dev.discordlinkingplus.manager.RankManager;
+import me.zombieman.dev.discordlinkingplus.manager.*;
 import me.zombieman.dev.discordlinkingplus.placeholders.LinkPlaceholders;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
 import net.dv8tion.jda.api.JDA;
@@ -46,8 +44,10 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     private RankManager rankManager;
     private API api;
     private PlayerDatabase playerDatabase;
+    private LinkStatisticsDatabase linkStatisticsDatabase;
     private DiscordDatabase discordDatabase;
     private CodeManager codeManager;
+    private StatisticsManager statisticsManager;
     private JedisPool jedisPool;
     private Thread redisSubscriberThread;
     private JDA jda;
@@ -97,6 +97,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             playerDatabase = new PlayerDatabase(url, username, password);
             codeManager = new CodeManager(url, username, password);
             discordDatabase = new DiscordDatabase(url, username, password);
+            linkStatisticsDatabase = new LinkStatisticsDatabase(this, url, username, password);
             serverDatabase = new ServerDatabase(this, url, username, password);
             serverListCache = new ServerListCache(serverDatabase);
             getLogger().info("Connected to MySQL database");
@@ -157,6 +158,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         getCommand("discordadmin").setExecutor(new AdminCmd(this));
 
         rankManager = new RankManager(this, DiscordBot.getBot());
+        statisticsManager = new StatisticsManager(this);
 
         new PlayerJoinListener(this);
 
@@ -186,6 +188,13 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
         codeManager.startExpiredCodeCleanup(this);
 
+//        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+//            try {
+//                getPlayerDatabase().populateLinkStatisticsFromDiscordData(linkStatisticsDatabase.getStatisticsDao());
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        });
     }
 
     @Override
@@ -275,11 +284,17 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     public DiscordDatabase getDiscordDatabase() {
         return discordDatabase;
     }
+    public LinkStatisticsDatabase getLinkStatisticsDatabase() {
+        return linkStatisticsDatabase;
+    }
     public Jedis getJedisResource() {
         return jedisPool.getResource();
     }
     public RankManager getRankManager() {
         return this.rankManager;
+    }
+    public StatisticsManager getStatisticsManager() {
+        return this.statisticsManager;
     }
 
     public boolean isRunning() {

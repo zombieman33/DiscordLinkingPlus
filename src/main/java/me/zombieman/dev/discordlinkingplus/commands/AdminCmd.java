@@ -132,7 +132,15 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 }
             });
 
+        } else if (args[0].equalsIgnoreCase("statistics")) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                sender.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + "----- Statistics -----");
+                sender.sendMessage(ChatColor.GRAY + "• " + ChatColor.YELLOW + "Average Link Time: " + ChatColor.GREEN + plugin.getLinkStatisticsDatabase().getFormattedAverageLinkTime());
+                sender.sendMessage(ChatColor.GRAY + "• " + ChatColor.YELLOW + "Total Linked Users: " + ChatColor.GREEN + plugin.getStatisticsManager().getTotalLinkedUsers());
+                sender.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + "--------------------");
+            });
         }
+
 
         return true;
     }
@@ -150,6 +158,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
             completions.add("unlink");
             completions.add("get");
             completions.add("reset");
+            completions.add("statistics");
         }
 
         if (args.length == 2) {

@@ -115,13 +115,15 @@ public class RedisSubscriber extends JedisPubSub {
 
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
 
-        try {
-            if (!plugin.getPlayerDatabase().getPlayerData(linkedUUID).isLinked()) {
-                plugin.getPlayerDatabase().updateLinkStatus(linkedUUID, true, true);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                if (!plugin.getPlayerDatabase().getPlayerData(linkedUUID).isLinked()) plugin.getPlayerDatabase().updateLinkStatus(linkedUUID, true, true);
+
+                plugin.getLinkStatisticsDatabase().trackLink(linkedUUID);
+            } catch (SQLException e) {
+                System.err.println("Error connecting to the database: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            System.err.println("Error connecting to the database: " + e.getMessage());
-        }
+        });
 
     }
     private void handleMessage(String discordID, String message) {
@@ -178,6 +180,15 @@ public class RedisSubscriber extends JedisPubSub {
         player.sendMessage(ChatColor.GREEN.toString() + ChatColor.STRIKETHROUGH + "                                        ");
 
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+           try {
+               plugin.getLinkStatisticsDatabase().trackUnlink(unlinkedUUID);
+           } catch (SQLException e) {
+               System.err.println("Error connecting to the database: " + e.getMessage());
+           }
+        });
+
     }
 
     @Override
