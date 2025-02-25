@@ -140,20 +140,6 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 sender.sendMessage(ChatColor.GRAY + "• " + ChatColor.YELLOW + "Total Linked Users: " + ChatColor.GREEN + plugin.getStatisticsManager().getTotalLinkedUsers());
                 sender.sendMessage(ChatColor.GOLD + ChatColor.BOLD.toString() + "--------------------");
             });
-
-            try {
-                API api = plugin.getApi();
-                if (api == null) {
-                    sender.sendMessage("API NULL");
-                    return false;
-                }
-
-                String discordTag = plugin.getPlayerDatabase().getPlayerData(UUID.fromString("9c6e22dc-fc6a-46c5-84f5-1a7f62bd46bd")).getDiscordTag();
-                api.sendMessageToDiscordUser(discordTag,
-                        ":trophy: **Karma Leaderboard** :trophy: <@" + discordTag + ">[NEW-LINE][NEW-LINE]> **1st**: `zombyman`[NEW-LINE]> **2nd**: `Tech`[NEW-LINE]> **3rd**: `Harry`[NEW-LINE][NEW-LINE]> **10th**: `Alfie`[NEW-LINE][NEW-LINE][NEW-LINE]For coming top **#1** you will receive:[NEW-LINE][NEW-LINE]* **Suffix [Karma Master]** :white_check_mark: [NEW-LINE]* **400 Gems** :white_check_mark: [NEW-LINE]* **15% Store Credit** :white_check_mark:[NEW-LINE] (Please open a [ticket here](https://discord.com/channels/927172634830045264/1327717498912505866/1327720840967749796) to claim your store credit)[NEW-LINE][NEW-LINE][NEW-LINE]**Note:**[NEW-LINE]This is still in beta. If you haven't received your rewards, please open a ticket, and we'll get it sorted for you!");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
 
 
