@@ -1,8 +1,12 @@
 package me.zombieman.dev.discordlinkingplus.api;
 
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
+import org.bukkit.Bukkit;
+import redis.clients.jedis.Jedis;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class API {
@@ -27,5 +31,20 @@ public class API {
     }
     public UUID getUUIDFromUsername(String username) throws SQLException {
         return plugin.getPlayerDatabase().getUuidByUsername(username);
+    }
+
+    public void sendMessageToDiscordUser(String discordTag, String message) {
+
+        message = message.replace(" ", "[SPACE]")
+                .replace("\n", "[NEW-LINE]")
+                .replace("*", "[STAR]");
+
+        String finalMessage = message;
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try (Jedis jedis = plugin.getJedisResource()) {
+                jedis.publish("DISCORD_LINKING", "DISCORD_MESSAGE:" + discordTag + ":" + finalMessage);
+            }
+        });
     }
 }

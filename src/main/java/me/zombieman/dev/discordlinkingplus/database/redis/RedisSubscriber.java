@@ -3,6 +3,7 @@ package me.zombieman.dev.discordlinkingplus.database.redis;
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import me.zombieman.dev.discordlinkingplus.discord.DiscordBot;
 import me.zombieman.dev.discordlinkingplus.manager.RewardsManager;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -78,6 +79,13 @@ public class RedisSubscriber extends JedisPubSub {
                     handleMinecraftMessage(uuid, msg);
                 }
                 break;
+            case "DISCORD_MESSAGE":
+                if (parts.length >= 3) {
+                    String discordTag = parts[1];
+                    String msg = parts[2];
+                    handleDiscordMessage(discordTag, msg);
+                }
+                break;
             default:
                 plugin.getLogger().warning("Received unrecognized message: " + message);
                 break;
@@ -100,6 +108,43 @@ public class RedisSubscriber extends JedisPubSub {
         }
         player.sendMessage(ChatColor.AQUA.toString() + ChatColor.STRIKETHROUGH + "                                       ");
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+    }
+    private void handleDiscordMessage(String discordTag, String msg) {
+
+        if (!plugin.isMainServer()) return;
+
+        msg = msg.replace("[SPACE]", " ")
+                .replace("[NEW-LINE]", "\n")
+                .replace("[STAR]", "*");
+
+        Guild guild = plugin.getGuild();
+
+        if (guild == null) return;
+
+        try {
+            Member member = guild.retrieveMemberById(discordTag).complete();
+
+            if (member == null) {
+                plugin.getLogger().warning("Member with ID " + discordTag + " could not be found in the guild.");
+                return;
+            }
+
+            String finalMessage = msg;
+            member.getUser().openPrivateChannel().queue(
+                    privateChannel -> {
+                        privateChannel.sendMessage(finalMessage).queue(
+                                success -> plugin.getLogger().info("Message sent to " + discordTag),
+                                error -> plugin.getLogger().warning("Failed to send DM to " + discordTag + ": " + error.getMessage())
+                        );
+                    },
+                    error -> {
+                        plugin.getLogger().warning("Could not open private channel for user " + discordTag + ": " + error.getMessage());
+                    }
+            );
+        } catch (Exception e) {
+            plugin.getLogger().severe("Error handling message for user " + discordTag + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void handleLinked(UUID linkedUUID, String discordName) {

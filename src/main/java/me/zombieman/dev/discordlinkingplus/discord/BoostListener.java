@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateBoostTime
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import redis.clients.jedis.Jedis;
 
 import java.nio.Buffer;
@@ -22,7 +24,7 @@ public class BoostListener extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMemberUpdateBoostTime(GuildMemberUpdateBoostTimeEvent event) {
+    public void onGuildMemberUpdateBoostTime(@NotNull GuildMemberUpdateBoostTimeEvent event) {
 
         System.out.println(" ");
         System.out.println("Someone SHOULD have boosted the server now!");
@@ -47,8 +49,6 @@ public class BoostListener extends ListenerAdapter {
                 boolean isOnline = Bukkit.getPlayer(uuid) != null;
 
                 if (event.getNewTimeBoosted() != null) stopped = "started";
-
-                // Stopped boosting
 
                 for (String command : plugin.getConfig().getStringList("boosting." + stopped)) {
 
