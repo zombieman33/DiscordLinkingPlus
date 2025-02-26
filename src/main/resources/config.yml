@@ -98,9 +98,9 @@ ranksToAdd:
 
 boosting:
   started:
-    - lp user %player% parent add booster
+    - lp user %player% permission set suffixsplus.suffix.booster
   stopped:
-    - lp user %player% parent remove booster
+    - lp user %player% permission unset suffixsplus.suffix.booster
 
 # discordlinkingplus.rank.<rank name>
 

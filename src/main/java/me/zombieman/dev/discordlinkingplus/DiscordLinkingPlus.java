@@ -232,6 +232,10 @@ public final class DiscordLinkingPlus extends JavaPlugin {
             discordDatabase.close();
             getLogger().info("MySQL discord database connection closed.");
         }
+        if (linkStatisticsDatabase != null) {
+            linkStatisticsDatabase.close();
+            getLogger().info("MySQL link discord statistics database connection closed.");
+        }
 
         // Plugin shutdown logic
         if (DiscordBot.getBot() != null) {
