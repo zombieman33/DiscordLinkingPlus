@@ -47,4 +47,13 @@ public class API {
             }
         });
     }
+
+    public String formatMessage(String message) {
+
+        message = message.replace(" ", "[SPACE]")
+                .replace("\n", "[NEW-LINE]")
+                .replace("*", "[STAR]");
+
+        return message;
+    }
 }
