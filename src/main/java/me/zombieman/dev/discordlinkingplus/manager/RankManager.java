@@ -107,15 +107,16 @@ public class RankManager {
 
             if (isStaff && (staffPermission == null || player.hasPermission(staffPermission))) {
                 formattedRank = staffPrefix + formattedRank
+                        .replace("_PLUS", "+")
                         .replace("-", ". ")
-                        .replace("_", "")
-                        .replace("PLUS", "+");
+                        .replace("_", "");
             }
 
             String formattedNickname = nicknameFormat
                     .replace("%rank%", formattedRank)
                     .replace("%ingame-name%", player.getName())
-                    .replace("%discord-name%", member.getEffectiveName());
+                    .replace("%discord-name%", member.getEffectiveName())
+                    .replace("_PLUS", "+");
 
             // Update the nickname if necessary
             if (!formattedNickname.equals(member.getNickname())) {
