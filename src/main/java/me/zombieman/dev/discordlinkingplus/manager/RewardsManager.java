@@ -20,12 +20,7 @@ public class RewardsManager {
     public static void handleReward(DiscordLinkingPlus plugin, UUID uuid, String server) {
         if (!server.equalsIgnoreCase(plugin.getConfig().getString("server.name")) && !server.equalsIgnoreCase("all")) return;
 
-        if (Bukkit.getPlayer(uuid) == null) {
-//            PlayerData.createFile(plugin, uuid);
-//            PlayerData.getPlayerDataConfig(plugin, uuid).set("rewardsServer", server);
-//            PlayerData.savePlayerData(plugin, uuid);
-            return;
-        }
+        if (Bukkit.getPlayer(uuid) == null) return;
 
         List<String> commands = plugin.getConfig().getStringList("LinkingRewards.commands");
         List<String> playerCommands = plugin.getConfig().getStringList("LinkingRewards.playerCommands");
