@@ -96,7 +96,7 @@ public class RankManager {
             validRanks.sort(Comparator.comparingInt(rank -> plugin.getConfig().getInt("ranks." + rank + ".priority", 0)).reversed());
             String highestPriorityRank = validRanks.get(0);
 
-            String nicknameFormat = plugin.getConfig().getString("DiscordNickname", "%rank% | %ingame-name%");
+            String nicknameFormat = plugin.getConfig().getString("DiscordNickname", "%rank% | %ingame-name% %suffix%");
             boolean shouldUppercase = plugin.getConfig().getBoolean("ShouldRankBeUppercase", false);
             String formattedRank = shouldUppercase ? highestPriorityRank.toUpperCase() : highestPriorityRank;
 
@@ -112,10 +112,15 @@ public class RankManager {
                         .replace("_", "");
             }
 
+            String suffix = PlaceholderAPI.setPlaceholders(player, plugin.getConfig().getString("SuffixPlaceholder", "%vault_suffix%"));
+
+            suffix = ColorManager.removeColors(suffix);
+
             String formattedNickname = nicknameFormat
                     .replace("%rank%", formattedRank)
                     .replace("%ingame-name%", player.getName())
                     .replace("%discord-name%", member.getEffectiveName())
+                    .replace("%suffix%", suffix)
                     .replace("_PLUS", "+");
 
             // Update the nickname if necessary

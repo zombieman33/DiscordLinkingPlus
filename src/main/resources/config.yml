@@ -9,6 +9,8 @@ MainServer: false
 # The time is in minutes.
 CodeTime: 10
 
+SuffixPlaceholder: "%vault_suffix%"
+
 database:
   mysql:
     username: username
@@ -48,7 +50,7 @@ server:
 # %rank% is the rank
 
 ShouldRankBeUppercase: true
-DiscordNickname: "%rank% | %ingame-name%"
+DiscordNickname: "%rank% | %ingame-name% %suffix%"
 
 UnLink:
   allowed: true
