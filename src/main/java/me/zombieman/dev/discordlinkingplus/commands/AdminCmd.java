@@ -100,16 +100,12 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             }
                             playerData = plugin.getPlayerDatabase().getPlayerData(uuid);
 
-                            // Create MiniMessage instance
                             MiniMessage mm = MiniMessage.miniMessage();
 
-                            // Send header with gradient color
                             sender.sendMessage(mm.deserialize("<gradient:#00BFFF:#1E90FF><bold>╔═══════ Discord Link Information ═══════╗</bold></gradient>"));
 
-                            // Send detailed player info with interactive elements
                             sendDiscordLinkMessage(sender, playerData, "<gradient:#00BFFF:#1E90FF>");
 
-                            // Send footer with gradient color
                             sender.sendMessage(mm.deserialize("<gradient:#00BFFF:#1E90FF><bold>╚══════════════════════════════╝</bold></gradient>"));
 
                             return;
