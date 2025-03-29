@@ -5,6 +5,9 @@ import me.zombieman.dev.discordlinkingplus.api.API;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.ServerData;
 import me.zombieman.dev.discordlinkingplus.manager.LoggingManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -97,16 +100,18 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             }
                             playerData = plugin.getPlayerDatabase().getPlayerData(uuid);
 
-                            sender.sendMessage(" ");
-                            sender.sendMessage(ChatColor.AQUA + "Player Name: " + ChatColor.BOLD + target);
-                            sender.sendMessage(ChatColor.AQUA + "UUID: " + ChatColor.BOLD + uuid);
-                            sender.sendMessage(ChatColor.AQUA + "Is Linked: " + ChatColor.BOLD + playerData.isLinked());
-                            sender.sendMessage(ChatColor.AQUA + "Has Linked: " + ChatColor.BOLD + playerData.hasLinked());
-                            sender.sendMessage(ChatColor.AQUA + "Claimed on: " + ChatColor.BOLD + playerData.getServerClaimedOn());
-                            if (playerData.isLinked()) {
-                                sender.sendMessage(ChatColor.AQUA + "Discord ID: " + ChatColor.BOLD + playerData.getDiscordTag());
-                            }
-                            sender.sendMessage(" ");
+                            // Create MiniMessage instance
+                            MiniMessage mm = MiniMessage.miniMessage();
+
+                            // Send header with gradient color
+                            sender.sendMessage(mm.deserialize("<gradient:#00BFFF:#1E90FF><bold>╔═══════ Discord Link Information ═══════╗</bold></gradient>"));
+
+                            // Send detailed player info with interactive elements
+                            sendDiscordLinkMessage(sender, playerData, "<gradient:#00BFFF:#1E90FF>");
+
+                            // Send footer with gradient color
+                            sender.sendMessage(mm.deserialize("<gradient:#00BFFF:#1E90FF><bold>╚══════════════════════════════╝</bold></gradient>"));
+
                             return;
                         case "reset":
 
@@ -181,4 +186,33 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
         String lastArg = args[args.length - 1].toLowerCase();
         return completions.stream().filter(s -> s.toLowerCase().startsWith(lastArg.toLowerCase())).collect(Collectors.toList());
     }
+
+
+    private void sendDiscordLinkMessage(CommandSender sender, DiscordLinkingData playerData, String color) {
+        MiniMessage mm = MiniMessage.miniMessage();
+
+        // Create interactive components
+        Component name = mm.deserialize(color + "<bold>▪ Player Name:</bold> <white>" + playerData.getUsername() + "</white>")
+                .clickEvent(ClickEvent.copyToClipboard(playerData.getUsername()))
+                .hoverEvent(HoverEvent.showText(mm.deserialize("<italic><gray>Click to copy name</gray></italic>")));
+
+        Component uuid = mm.deserialize(color + "<bold>▪ UUID:</bold> <white>" + playerData.getUuid() + "</white>")
+                .clickEvent(ClickEvent.copyToClipboard(playerData.getUuid()))
+                .hoverEvent(HoverEvent.showText(mm.deserialize("<italic><gray>Click to copy UUID</gray></italic>")));
+
+        Component discordTag = mm.deserialize(color + "<bold>▪ Discord Tag:</bold> <white>" + playerData.getDiscordTag() + "</white>")
+                .clickEvent(ClickEvent.copyToClipboard(playerData.getDiscordTag()))
+                .hoverEvent(HoverEvent.showText(mm.deserialize("<italic><gray>Click to copy Discord Tag</gray></italic>")));
+
+        Component isLinked = mm.deserialize(color + "<bold>▪ Linked with Discord:</bold> <white>" + playerData.isLinked() + "</white>");
+        Component hasLinked = mm.deserialize(color + "<bold>▪ Has Linked Before:</bold> <white>" + playerData.hasLinked() + "</white>");
+
+        // Send the formatted messages to the sender
+        sender.sendMessage(name);
+        sender.sendMessage(uuid);
+        sender.sendMessage(discordTag);
+        sender.sendMessage(isLinked);
+        sender.sendMessage(hasLinked);
+    }
+
 }
