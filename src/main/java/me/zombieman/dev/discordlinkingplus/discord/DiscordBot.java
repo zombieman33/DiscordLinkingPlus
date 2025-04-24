@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.time.Instant;
 import java.util.EnumSet;
@@ -27,17 +29,23 @@ public class DiscordBot {
                                 GatewayIntent.DIRECT_MESSAGES,
                                 GatewayIntent.GUILD_MEMBERS,
                                 GatewayIntent.GUILD_MODERATION
-                                )
+                        )
+                        .setChunkingFilter(ChunkingFilter.ALL)
+                        .setMemberCachePolicy(MemberCachePolicy.ALL)
                         .setActivity(Activity.playing(playing))
                         .build();
+
                 jdaInstance.awaitReady();
-                System.out.println("Discord bot initialized.");
+                System.out.println("Discord bot initialized with " +
+                        jdaInstance.getGuilds().size() + " guilds.");
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return jdaInstance;
     }
+
 
     public static void shutdown() {
         if (jdaInstance != null) {

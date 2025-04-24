@@ -2,11 +2,15 @@ package me.zombieman.dev.discordlinkingplus.manager;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
+import me.zombieman.dev.discordlinkingplus.api.API;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
@@ -21,6 +25,8 @@ public class RankManager {
     public RankManager(DiscordLinkingPlus plugin, JDA jda) {
         this.plugin = plugin;
         this.jda = jda;
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::validateRoles, 0L, 20L * 60 * 60 * 12);
     }
 
     public void assignRankAndNickname(Player player) throws SQLException {
@@ -245,4 +251,89 @@ public class RankManager {
             }
         });
     }
+
+    public void validateRoles() {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            plugin.getLogger().info("Starting role validation task...");
+
+            Map<String, String> roleIdToRank = loadRoleIdToRank();
+            Guild guild = jda.getGuildById(plugin.guildID());
+            if (guild == null) {
+                plugin.getLogger().warning("Guild not found with ID: " + plugin.guildID());
+                return;
+            }
+
+            plugin.getLogger().info("Checking roles for " + guild.getMembers().size() + " members...");
+
+            for (Member member : guild.getMembers()) {
+                try {
+                    API api = plugin.getApi();
+                    if (api == null) continue;
+
+                    UUID uuid = api.getUUIDFromDiscordTag(member.getId());
+
+                    if (uuid == null) continue;
+
+                    User lpUser = getLuckPermsUser(uuid);
+                    if (lpUser == null) {
+                        plugin.getLogger().info("LuckPerms user not found for UUID: " + uuid);
+                        continue;
+                    }
+
+                    for (Role role : member.getRoles()) {
+                        String rankName = roleIdToRank.get(role.getId());
+                        if (rankName == null) continue;
+
+                        String permission = "discordlinkingplus.rank." + rankName;
+                        boolean hasPermission = lpUser.getCachedData()
+                                .getPermissionData()
+                                .checkPermission(permission)
+                                .asBoolean();
+
+                        if (!hasPermission) {
+                            plugin.getLogger().info("Removing role '" + role.getName() +
+                                    "' from member '" + member.getUser().getAsTag() +
+                                    "' (missing permission: " + permission + ")");
+                            guild.removeRoleFromMember(member, role).queue();
+//                        } else {
+//                            plugin.getLogger().info("Member '" + member.getUser().getAsTag() +
+//                                    "' has permission: " + permission);
+                        }
+                    }
+                } catch (SQLException e) {
+                    plugin.getLogger().severe("SQLException while validating roles for member: " + member.getUser().getAsTag());
+                    e.printStackTrace();
+                }
+            }
+
+            plugin.getLogger().info("Finished role validation task.");
+        });
+    }
+
+    private Map<String, String> loadRoleIdToRank() {
+        Map<String, String> map = new HashMap<>();
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("ranks");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                String roleId = section.getConfigurationSection(key).getString("discordRank");
+                if (roleId != null) {
+                    map.put(roleId, key);
+                }
+            }
+        }
+        return map;
+    }
+
+    private User getLuckPermsUser(UUID uuid) {
+        User user = LuckPermsProvider.get().getUserManager().getUser(uuid);
+
+        if (user == null) {
+            LuckPermsProvider.get().getUserManager().loadUser(uuid).join();
+            user = LuckPermsProvider.get().getUserManager().getUser(uuid);
+        }
+
+        return user;
+    }
+
+
 }

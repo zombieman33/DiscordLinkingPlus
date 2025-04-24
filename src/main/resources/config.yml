@@ -79,7 +79,6 @@ commands:
     - lp user %player% parent add member_plus
   unlinked:
     - lp user %player% permission unset suffixsplus.suffix.linking
-    - lp user %player% parent remove suffix_linking
     - lp user %player% parent remove member_plus
 
 ranksToRemove:
@@ -107,11 +106,6 @@ boosting:
 # discordlinkingplus.rank.<rank name>
 
 ranks:
-  linked:
-    update-name: true
-    update-role: true
-    discordRank: 1291481074198904894
-    priority: 0
   member:
     update-name: true
     update-role: true
