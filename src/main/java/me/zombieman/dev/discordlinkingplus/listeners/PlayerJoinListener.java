@@ -44,6 +44,24 @@ public class PlayerJoinListener implements Listener {
             try {
                 DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId(), player.getName());
 
+                if (playerData != null && playerData.isLinked()) {
+                    String discordTag = playerData.getDiscordTag();
+                    if (plugin.getGuild() != null && discordTag != null) {
+                        plugin.getGuild().retrieveMemberById(discordTag).queue(
+                                success -> {},
+                                failure -> {
+                                    try {
+                                        plugin.getPlayerDatabase().updateLinkStatus(player.getUniqueId(), false, true);
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    plugin.getRankManager().commands(player.getName(), false);
+                                }
+                        );
+                    }
+                }
+
                 if (playerData != null && !playerData.getUsername().equals(player.getName()) && playerData.isLinked()) {
                     LoggingManager.sendEmbedMessage("Updated Name", player.getName(), playerData.getDiscordTag(), player.getUniqueId().toString(), null, "Name Update!\n\n> Old Name: **" + playerData.getUsername() + "**\n> New Name: **" + player.getName() + "**", Color.GRAY);
                     plugin.getPlayerDatabase().updateUsername(player.getUniqueId(), player.getName());
