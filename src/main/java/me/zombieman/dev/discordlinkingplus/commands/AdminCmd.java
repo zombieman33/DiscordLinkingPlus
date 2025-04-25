@@ -71,10 +71,6 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             String discordTag = playerData.getDiscordTag();
                             String playerName = playerData.getUsername();
 
-                            plugin.getRankManager().removeRank(discordTag, false);
-                            plugin.getRankManager().commands(discordTag, false);
-                            plugin.getRankManager().addRank(discordTag, "unLinked");
-
                             LoggingManager.sendEmbedMessage("Successfully Unlinked", playerName, discordTag, uuid.toString(), null, "Unlinked with `/discordadmin unlink " + target + "`\n\n> Unlinked By: **" + sender.getName() + "**\n> Force Unlink: **true**", Color.BLACK);
 
                             sender.sendMessage("Successfully unlinked " + target + "'s account");
@@ -91,6 +87,10 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
 
                             plugin.getPlayerDatabase().updateLinkStatus(uuid, false, true);
 
+
+                            plugin.getRankManager().removeRank(discordTag, false);
+                            plugin.getRankManager().commands(discordTag, false);
+                            plugin.getRankManager().addRank(discordTag, "unLinked");
                             return;
                         case "get":
 
