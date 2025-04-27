@@ -126,13 +126,23 @@ public class RankManager {
                     .replace("%rank%", formattedRank)
                     .replace("%ingame-name%", player.getName())
                     .replace("%discord-name%", member.getEffectiveName())
-                    .replace("%suffix%", suffix)
                     .replace("_PLUS", "+");
+
+            int suffixLength = suffix.length();
+
+            if (formattedNickname.replace("%suffix%", "").length() <= (32 - suffixLength)) {
+                formattedNickname = formattedNickname.replace("%suffix%", suffix);
+            } else {
+                System.out.println("Could not include users suffix. Nickname is too long.");
+            }
+
+            formattedNickname = formattedNickname.replace("%suffix%", "");
 
             // Update the nickname if necessary
             if (!formattedNickname.equals(member.getNickname())) {
+                String finalFormattedNickname = formattedNickname;
                 guild.modifyNickname(member, formattedNickname).queue(
-                        success -> plugin.getLogger().info("Nickname updated to: " + formattedNickname),
+                        success -> plugin.getLogger().info("Nickname updated to: " + finalFormattedNickname),
                         failure -> plugin.getLogger().warning("Failed to update nickname for " + member.getEffectiveName())
                 );
             }
