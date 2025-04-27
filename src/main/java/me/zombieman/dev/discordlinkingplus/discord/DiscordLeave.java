@@ -37,9 +37,10 @@ public class DiscordLeave extends ListenerAdapter {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 UUID uuid = plugin.getApi().getUUIDFromDiscordTag(discordId);
-                System.out.println("uuid: " + uuid);
+
+                if (!plugin.getApi().isLinked(uuid) || uuid == null) return;
+
                 String name = plugin.getApi().getUsernameFromDiscordTag(discordId);
-                System.out.println("name: " + name);
 
                 try (Jedis jedis = plugin.getJedisResource()) {
                     jedis.publish("DISCORD_LINKING", "UNLINKED:" + uuid.toString() + ":PLAYER");
