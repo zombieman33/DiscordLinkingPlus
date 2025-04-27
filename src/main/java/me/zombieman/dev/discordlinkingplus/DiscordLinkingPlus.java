@@ -146,7 +146,8 @@ public final class DiscordLinkingPlus extends JavaPlugin {
                         new DiscordListener(this),
                         new DiscordBanListener(this),
                         new DiscordTimeoutListener(this),
-                        new BoostListener(this));
+                        new BoostListener(this),
+                        new DiscordLeave(this));
 
         // Listeners
 //        DiscordBot.getBot().addEventListener(new DiscordBanListener(this));
