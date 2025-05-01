@@ -109,21 +109,8 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             sender.sendMessage(mm.deserialize("<gradient:#00BFFF:#1E90FF><bold>╚══════════════════════════════╝</bold></gradient>"));
 
                             return;
-                        case "reset":
-
-                            String server = args[1];
-
-                            Collection<ServerData> serverData = plugin.getServerListCache().getServers();
-                            List<String> servers = serverData.stream().map(ServerData::getServerID).collect(Collectors.toList());
-
-                            if (!servers.contains(server)) {
-                                sender.sendMessage(ChatColor.RED + "This server doesn't exist!");
-                                return;
-                            }
-
-                            plugin.getPlayerDatabase().resetClaimedServer(server);
-
-                            sender.sendMessage(ChatColor.GREEN + "Successfully reset all claimed rewards on the '" + server + "' server.");
+                        case "reset", "resetserverrewardssotechdoesnotdoubthimself", "resetrewards":
+                            resetRewards(sender, target);
                             return;
                         default:
                             sender.sendMessage("/discordadmin <unlink, get, reset> <player, server>");
@@ -146,6 +133,21 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
 
         return true;
     }
+
+    private void resetRewards(CommandSender sender, String server) throws SQLException {
+        Collection<ServerData> serverData = plugin.getServerListCache().getServers();
+        List<String> servers = serverData.stream().map(ServerData::getServerID).collect(Collectors.toList());
+
+        if (!servers.contains(server)) {
+            sender.sendMessage(ChatColor.RED + "This server doesn't exist!");
+            return;
+        }
+
+        plugin.getPlayerDatabase().resetClaimedServer(server);
+
+        sender.sendMessage(ChatColor.GREEN + "Successfully reset all claimed rewards on the '" + server + "' server.");
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 
@@ -159,7 +161,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             completions.add("unlink");
             completions.add("get");
-            completions.add("reset");
+            completions.add("resetrewards");
             completions.add("statistics");
         }
 

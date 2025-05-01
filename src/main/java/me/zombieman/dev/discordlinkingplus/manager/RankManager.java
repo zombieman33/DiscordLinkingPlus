@@ -106,17 +106,16 @@ public class RankManager {
             boolean shouldUppercase = plugin.getConfig().getBoolean("ShouldRankBeUppercase", false);
             String formattedRank = shouldUppercase ? highestPriorityRank.toUpperCase() : highestPriorityRank;
 
+            formattedRank = formattedRank.replace("_PLUS", "+")
+                    .replace("-", ".")
+                    .replace("_", "");
+
             // Check for staff settings
             boolean isStaff = plugin.getConfig().getBoolean("ranks." + highestPriorityRank + ".check-icon", false);
             String staffPrefix = plugin.getConfig().getString("ranks." + highestPriorityRank + ".icon-prefix", "");
             String staffPermission = plugin.getConfig().getString("ranks." + highestPriorityRank + ".icon-permission", "");
 
-            if (isStaff && (staffPermission == null || player.hasPermission(staffPermission))) {
-                formattedRank = staffPrefix + formattedRank
-                        .replace("_PLUS", "+")
-                        .replace("-", ". ")
-                        .replace("_", "");
-            }
+            if (isStaff && player.hasPermission(staffPermission)) formattedRank = staffPrefix + formattedRank;
 
             String suffix = PlaceholderAPI.setPlaceholders(player, plugin.getConfig().getString("SuffixPlaceholder", "%vault_suffix%"));
 
