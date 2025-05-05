@@ -33,6 +33,7 @@ public class DiscordBot {
                         .setChunkingFilter(ChunkingFilter.ALL)
                         .setMemberCachePolicy(MemberCachePolicy.ALL)
                         .setActivity(Activity.playing(playing))
+                        .setEventPassthrough(true)
                         .build();
 
                 jdaInstance.awaitReady();
