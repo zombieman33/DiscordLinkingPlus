@@ -121,7 +121,6 @@ public class PlayerDatabase {
         List<DiscordLinkingData> result = dataDao.queryForEq("discordTag", discordTag);
 
         if (!result.isEmpty()) {
-            System.out.println(UUID.fromString(result.get(0).getUuid()));
             return UUID.fromString(result.get(0).getUuid());
         }
 

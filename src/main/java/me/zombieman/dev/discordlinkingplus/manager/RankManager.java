@@ -26,7 +26,7 @@ public class RankManager {
         this.plugin = plugin;
         this.jda = jda;
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::validateRoles, 0L, 20L * 60 * 60 * 12);
+        if (plugin.isMainServer()) Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::validateRoles, 0L, 20L * 60 * 60 * 12);
     }
 
     public void assignRankAndNickname(Player player) throws SQLException {
@@ -262,10 +262,12 @@ public class RankManager {
     }
 
     public void validateRoles() {
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             plugin.getLogger().info("Starting role validation task...");
 
             Map<String, String> roleIdToRank = loadRoleIdToRank();
+            System.out.println(roleIdToRank);
             Guild guild = jda.getGuildById(plugin.guildID());
             if (guild == null) {
                 plugin.getLogger().warning("Guild not found with ID: " + plugin.guildID());
@@ -294,6 +296,7 @@ public class RankManager {
                         if (rankName == null) continue;
 
                         String permission = "discordlinkingplus.rank." + rankName;
+
                         boolean hasPermission = lpUser.getCachedData()
                                 .getPermissionData()
                                 .checkPermission(permission)
@@ -343,6 +346,5 @@ public class RankManager {
 
         return user;
     }
-
 
 }
