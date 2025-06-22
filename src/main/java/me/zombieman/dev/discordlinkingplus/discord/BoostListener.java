@@ -2,6 +2,8 @@ package me.zombieman.dev.discordlinkingplus.discord;
 
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import me.zombieman.dev.discordlinkingplus.manager.RewardsManager;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateBoostTimeEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bukkit.Bukkit;
@@ -44,22 +46,36 @@ public class BoostListener extends ListenerAdapter {
 
                 if (uuid == null) return;
 
-                String stopped = "stopped";
+                String stopped = "started";
 
                 boolean isOnline = Bukkit.getPlayer(uuid) != null;
 
-                if (event.getNewTimeBoosted() != null) stopped = "started";
+
+                Guild guild = plugin.getGuild();
+                if (guild != null) {
+                    Member member = guild.retrieveMemberById(id).complete();
+
+                    if (member != null) {
+                        if (plugin.getPlayerDatabase().getPlayerData(uuid).getBoosting() && !member.isBoosting()) stopped = "stopped";
+                    }
+                }
 
                 for (String command : plugin.getConfig().getStringList("boosting." + stopped)) {
 
                     if (isOnline) command = RewardsManager.commandReplacements(command, Bukkit.getPlayer(uuid));
                     if (!isOnline) command = RewardsManager.commandReplacementsUUID(command, uuid);
 
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                    String finalCommand = command;
+
+                    Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand));
+
                 }
 
-                sendMessage(uuid, stopped);
+                boolean start = !stopped.equalsIgnoreCase("stopped");
 
+                plugin.getPlayerDatabase().updateBoosting(uuid, start);
+
+                sendMessage(uuid, stopped);
 
             } catch (SQLException e) {
                 e.printStackTrace();

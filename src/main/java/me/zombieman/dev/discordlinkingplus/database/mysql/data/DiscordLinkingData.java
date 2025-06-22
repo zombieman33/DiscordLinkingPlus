@@ -24,6 +24,9 @@ public class DiscordLinkingData {
     @DatabaseField
     private boolean hasLinked;
 
+    @DatabaseField
+    private boolean boosting;
+
     public DiscordLinkingData() {}
 
     // Getters and Setters
@@ -48,4 +51,7 @@ public class DiscordLinkingData {
 
     public boolean hasLinked() { return hasLinked; }
     public void setHasLinked(boolean hasLinked) { this.hasLinked = hasLinked; }
+
+    public boolean getBoosting() { return boosting; }
+    public void setBoosting(boolean boosting) { this.boosting = boosting; }
 }

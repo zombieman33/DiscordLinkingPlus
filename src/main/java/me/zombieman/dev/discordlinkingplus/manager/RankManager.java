@@ -7,8 +7,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
+import net.luckperms.api.query.QueryOptions;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -20,13 +22,16 @@ import java.util.*;
 public class RankManager {
 
     private final DiscordLinkingPlus plugin;
+    private final LuckPerms luckPerms;
     private final JDA jda;
 
     public RankManager(DiscordLinkingPlus plugin, JDA jda) {
         this.plugin = plugin;
         this.jda = jda;
 
+        this.luckPerms = LuckPermsProvider.get();
         if (plugin.isMainServer()) Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::validateRoles, 0L, 20L * 60 * 60 * 12);
+        if (plugin.isMainServer()) Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::validateBoosting, 0L, 20L * 60 * 60);
     }
 
     public void assignRankAndNickname(Player player) throws SQLException {
@@ -319,6 +324,52 @@ public class RankManager {
             }
 
             plugin.getLogger().info("Finished role validation task.");
+        });
+    }
+
+    public void validateBoosting() {
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+
+            Map<String, String> roleIdToRank = loadRoleIdToRank();
+            System.out.println(roleIdToRank);
+            Guild guild = jda.getGuildById(plugin.guildID());
+            if (guild == null) {
+                plugin.getLogger().warning("Guild not found with ID: " + plugin.guildID());
+                return;
+            }
+
+            plugin.getLogger().info("Checking boosting status for " + guild.getMembers().size() + " members...");
+
+            for (Member member : guild.getMembers()) {
+                try {
+                    API api = plugin.getApi();
+                    if (api == null) continue;
+
+                    UUID uuid = api.getUUIDFromDiscordTag(member.getId());
+
+                    if (uuid == null) continue;
+
+                    if (!member.isBoosting()) continue;
+
+                    if (!plugin.getPlayerDatabase().getPlayerData(uuid).getBoosting()) continue;
+
+                    plugin.getPlayerDatabase().updateBoosting(uuid, false);
+
+                    for (String command : plugin.getConfig().getStringList("boosting.stopped")) {
+
+                        String finalCommand = RewardsManager.commandReplacementsUUID(command, uuid);
+
+                        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand));
+                    }
+
+                } catch (SQLException e) {
+                    plugin.getLogger().severe("SQLException while validating boosting status for member: " + member.getUser().getAsTag());
+                    e.printStackTrace();
+                }
+            }
+
+            plugin.getLogger().info("Finished boosting validation task.");
         });
     }
 

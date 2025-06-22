@@ -188,14 +188,6 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         scheduleLinkReminder();
 
         codeManager.startExpiredCodeCleanup(this);
-
-//        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-//            try {
-//                getPlayerDatabase().populateLinkStatisticsFromDiscordData(linkStatisticsDatabase.getStatisticsDao());
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        });
     }
 
     @Override
@@ -340,8 +332,6 @@ public final class DiscordLinkingPlus extends JavaPlugin {
     public static DiscordLinkingPlus getInstance() {
         return instance;
     }
-
-
 
     public ServerDatabase getServerDatabase() {
         return serverDatabase;

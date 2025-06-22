@@ -9,7 +9,10 @@ import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingDat
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.statistics.LinkStatisticsData;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,9 +24,17 @@ public class PlayerDatabase {
     public PlayerDatabase(String jdbcUrl, String username, String password) throws SQLException {
         connectionSource = new JdbcConnectionSource(jdbcUrl, username, password);
         TableUtils.createTableIfNotExists(connectionSource, DiscordLinkingData.class);
+
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("ALTER TABLE discord_linking ADD COLUMN boosting BOOLEAN NOT NULL DEFAULT FALSE;");
+        } catch (SQLException ignored) {}
+
+
         dataDao = DaoManager.createDao(connectionSource, DiscordLinkingData.class);
         System.out.println("Database connection established and tables checked.");
     }
+
 
     public void close() {
         try {
@@ -86,6 +97,13 @@ public class PlayerDatabase {
         if (data != null) {
             data.setLinked(isLinked);
             data.setHasLinked(hasLinked);
+            dataDao.update(data);
+        }
+    }
+    public void updateBoosting(UUID uuid, boolean boostTime) throws SQLException {
+        DiscordLinkingData data = dataDao.queryForId(uuid.toString());
+        if (data != null) {
+            data.setBoosting(boostTime);
             dataDao.update(data);
         }
     }
