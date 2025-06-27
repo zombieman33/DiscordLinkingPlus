@@ -2,8 +2,6 @@ package me.zombieman.dev.discordlinkingplus.discord;
 
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
-import net.dv8tion.jda.api.events.guild.GuildTimeoutEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberUpdateEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateTimeOutEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bukkit.Bukkit;
@@ -13,60 +11,56 @@ import redis.clients.jedis.Jedis;
 
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
-import java.util.UUID;
-
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 public class DiscordTimeoutListener extends ListenerAdapter {
 
     private final DiscordLinkingPlus plugin;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss O");
 
     public DiscordTimeoutListener(DiscordLinkingPlus plugin) {
         this.plugin = plugin;
-        start();
-        System.out.println("Initialized timeout listener");
+        startTimeoutChecker();
+        System.out.println("Initialized DiscordTimeoutListener for timeouts.");
     }
 
     @Override
-    public void onGuildMemberUpdate(@NotNull GuildMemberUpdateEvent event) {
-
+    public void onGuildMemberUpdateTimeOut(@NotNull GuildMemberUpdateTimeOutEvent event) {
         if (!plugin.isMainServer()) return;
 
-        String userId = event.getMember().getUser().getId();
+        String userId = event.getUser().getId();
+        OffsetDateTime newTimeout = event.getNewTimeOutEnd();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                OffsetDateTime oldTimeOut = plugin.getDiscordDatabase().getPlayerData(userId).getTimeoutEnd();
-                OffsetDateTime newTimeOut = event.getMember().getTimeOutEnd();
-
-                if (oldTimeOut == null && newTimeOut == null) return;
-
-                if (plugin.getPlayerDatabase().getUuidByDiscordTag(userId) == null) return;
-
+                OffsetDateTime oldTimeout = plugin.getDiscordDatabase().getPlayerData(userId).getTimeoutEnd();
                 UUID uuid = plugin.getPlayerDatabase().getUuidByDiscordTag(userId);
 
-                if (!plugin.getPlayerDatabase().getPlayerData(uuid).isLinked()) return;
+                if (uuid == null) return;
 
-                // Define a DateTimeFormatter to make the time more readable
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss O");
+                DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(uuid);
+                if (playerData == null || !playerData.isLinked()) return;
 
-                String message;
+                String message = null;
 
-                if (oldTimeOut == null && newTimeOut != null) {
-                    message = "<#FF0000>You have been timed out until \n<bold>" + newTimeOut.format(formatter) + "</bold>.";
-                    plugin.getDiscordDatabase().updateTime(userId, newTimeOut);
-                } else if (oldTimeOut != null && newTimeOut == null) {
+                if (oldTimeout == null && newTimeout != null) {
+                    message = "<#FF0000>You have been timed out until:\n<bold>" + newTimeout.format(formatter) + "</bold>.";
+                    plugin.getDiscordDatabase().updateTime(userId, newTimeout);
+
+                } else if (oldTimeout != null && newTimeout == null) {
                     message = "<#00FF00>Your timeout has been removed.";
                     plugin.getDiscordDatabase().updateTime(userId, null);
-                } else if (oldTimeOut != null && !oldTimeOut.equals(newTimeOut)) {
-                    message = "<#FF0000>Your timeout got updated to:\n<bold>" + newTimeOut.format(formatter) + "</bold>.";
-                    plugin.getDiscordDatabase().updateTime(userId, newTimeOut);
-                } else {
-                    return;
+
+                } else if (oldTimeout != null && !oldTimeout.equals(newTimeout)) {
+                    message = "<#FF0000>Your timeout was updated to:\n<bold>" + newTimeout.format(formatter) + "</bold>.";
+                    plugin.getDiscordDatabase().updateTime(userId, newTimeout);
                 }
 
-                try (Jedis jedis = plugin.getJedisResource()) {
-                    jedis.publish("DISCORD_LINKING", "MINECRAFT_MESSAGE:" + uuid + ":" + message);
+                if (message != null) {
+                    try (Jedis jedis = plugin.getJedisResource()) {
+                        jedis.publish("DISCORD_LINKING", "MINECRAFT_MESSAGE:" + uuid + ":" + message);
+                    }
                 }
 
             } catch (SQLException e) {
@@ -75,44 +69,35 @@ public class DiscordTimeoutListener extends ListenerAdapter {
         });
     }
 
-    public void start() {
+    private void startTimeoutChecker() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            try {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId());
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
+                    if (playerData == null || !playerData.isLinked()) continue;
 
-                try {
+                    String discordId = playerData.getDiscordTag();
+                    OffsetDateTime storedTimeout = plugin.getDiscordDatabase().getPlayerData(discordId).getTimeoutEnd();
 
-                    for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (storedTimeout == null) continue;
 
-                        DiscordLinkingData playerData = plugin.getPlayerDatabase().getPlayerData(player.getUniqueId());
+                    boolean stillTimedOut = plugin.getGuild()
+                            .retrieveMemberById(discordId)
+                            .complete()
+                            .isTimedOut();
 
-                        if (playerData == null) continue;
-                        if (!playerData.isLinked()) continue;
+                    if (!stillTimedOut) {
+                        plugin.getDiscordDatabase().updateTime(discordId, null);
 
-                        String id = playerData.getDiscordTag();
-
-                        if (plugin.getDiscordDatabase().getPlayerData(id).getTimeoutEnd() == null) continue;
-
-                        String message = "n/a";
-
-                        if (!plugin.getGuild().retrieveMemberById(id).complete().isTimedOut()) {
-                            plugin.getDiscordDatabase().updateTime(id, null);
-                            message = "<#00FF00>Your timeout has been removed.";
-
-                            try (Jedis jedis = plugin.getJedisResource()) {
-                                jedis.publish("DISCORD_LINKING", "MINECRAFT_MESSAGE:" + player.getUniqueId().toString() + ":" + message);
-                            }
+                        try (Jedis jedis = plugin.getJedisResource()) {
+                            jedis.publish("DISCORD_LINKING", "MINECRAFT_MESSAGE:" + player.getUniqueId() + ":<#00FF00>Your timeout has been removed.");
                         }
-
-
                     }
-
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        }, 0L, 20 * 60L);
-
+        }, 0L, 20 * 60L); // Every 60 seconds
     }
 }
