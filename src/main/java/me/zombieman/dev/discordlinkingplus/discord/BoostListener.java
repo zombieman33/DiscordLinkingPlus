@@ -67,6 +67,8 @@ public class BoostListener extends ListenerAdapter {
 
                     String finalCommand = command;
 
+                    System.out.println("Commands: " + finalCommand);
+
                     Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand));
 
                 }

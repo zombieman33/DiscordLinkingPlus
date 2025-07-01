@@ -165,11 +165,14 @@ public class RankManager {
             return;
         }
 
-        Member member = guild.retrieveMemberById(discordID).complete();
-        if (member == null) {
+
+        if (guild.retrieveMemberById(discordID).complete() == null) {
             plugin.getLogger().warning("Member not found for Discord ID: " + discordID);
             return;
         }
+
+        Member member = guild.retrieveMemberById(discordID).complete();
+
 
         // Determine the path based on linked status
         String linkedOrNot = isLinked ? "linked" : "unLinked";
@@ -359,6 +362,8 @@ public class RankManager {
                     for (String command : plugin.getConfig().getStringList("boosting.stopped")) {
 
                         String finalCommand = RewardsManager.commandReplacementsUUID(command, uuid);
+
+                        System.out.println("Command: " + finalCommand);
 
                         Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand));
                     }
