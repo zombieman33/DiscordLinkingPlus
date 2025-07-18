@@ -2,9 +2,12 @@ package me.zombieman.dev.discordlinkingplus.database.mysql;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.jdbc.DataSourceConnectionSource;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.DiscordLinkingData;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.statistics.LinkStatisticsData;
 import me.zombieman.dev.discordlinkingplus.utils.ServerNameUtil;
@@ -20,33 +23,50 @@ import java.util.UUID;
 public class PlayerDatabase {
     private final Dao<DiscordLinkingData, String> dataDao;
     private final ConnectionSource connectionSource;
+    private final HikariDataSource hikari;
 
     public PlayerDatabase(String jdbcUrl, String username, String password) throws SQLException {
-        connectionSource = new JdbcConnectionSource(jdbcUrl, username, password);
+        // HikariCP
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setMaximumPoolSize(10);
+        config.setIdleTimeout(600_000);
+        config.setMaxLifetime(1_800_000);
+        config.setConnectionTimeout(30_000);
+        config.setConnectionTestQuery("SELECT 1");
+        config.setPoolName("DiscordHikariPool-PlayerDatabase");
+
+        this.hikari = new HikariDataSource(config);
+        this.connectionSource = new DataSourceConnectionSource(hikari, jdbcUrl);
+
+        // Create table if not exists
         TableUtils.createTableIfNotExists(connectionSource, DiscordLinkingData.class);
 
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             Statement stmt = conn.createStatement()) {
+        try (Connection conn = hikari.getConnection(); Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("ALTER TABLE discord_linking ADD COLUMN boosting BOOLEAN NOT NULL DEFAULT FALSE;");
         } catch (SQLException ignored) {}
 
-
-        dataDao = DaoManager.createDao(connectionSource, DiscordLinkingData.class);
+        this.dataDao = DaoManager.createDao(connectionSource, DiscordLinkingData.class);
         System.out.println("Database connection established and tables checked.");
     }
 
-
     public void close() {
         try {
-            if (connectionSource != null && connectionSource.isOpen("default")) {
+            if (connectionSource != null) {
                 connectionSource.close();
-                System.out.println("Database connection closed.");
             }
+            if (hikari != null) {
+                hikari.close();
+            }
+            System.out.println("Database connection closed.");
         } catch (Exception e) {
             System.out.println("Failed to close database connection: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 
     public DiscordLinkingData getPlayerData(UUID uuid, String username) throws SQLException {
         DiscordLinkingData data = dataDao.queryForId(uuid.toString());

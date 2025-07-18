@@ -2,39 +2,58 @@ package me.zombieman.dev.discordlinkingplus.database.mysql;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.jdbc.DataSourceConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import me.zombieman.dev.discordlinkingplus.DiscordLinkingPlus;
 import me.zombieman.dev.discordlinkingplus.database.mysql.data.ServerData;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class ServerDatabase {
     private final Dao<ServerData, String> dataDao;
     private final ConnectionSource connectionSource;
+    private final HikariDataSource dataSource;
     private final DiscordLinkingPlus plugin;
 
     public ServerDatabase(DiscordLinkingPlus plugin, String jdbcUrl, String username, String password) throws SQLException {
         this.plugin = plugin;
-        connectionSource = new JdbcConnectionSource(jdbcUrl, username, password);
+
+        // HikariCP
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setIdleTimeout(30000);
+        config.setMaxLifetime(600000);
+        config.setConnectionTimeout(30000);
+        config.setConnectionTestQuery("SELECT 1");
+        config.setPoolName("DiscordHikariPool-ServerDatabase");
+
+        dataSource = new HikariDataSource(config);
+
+        connectionSource = new DataSourceConnectionSource(dataSource, jdbcUrl);
         TableUtils.createTableIfNotExists(connectionSource, ServerData.class);
         dataDao = DaoManager.createDao(connectionSource, ServerData.class);
-        System.out.println("Database connection established and tables checked.");
+
+        System.out.println("HikariCP server database connection established and tables checked.");
         start();
     }
 
     public void close() {
         try {
-            if (connectionSource != null && connectionSource.isOpen("default")) {
+            if (connectionSource != null) {
                 connectionSource.close();
-                System.out.println("Database connection closed.");
+            }
+            if (dataSource != null && !dataSource.isClosed()) {
+                dataSource.close();
+                System.out.println("HikariCP connection pool closed.");
             }
         } catch (Exception e) {
             System.out.println("Failed to close database connection: " + e.getMessage());
@@ -47,9 +66,8 @@ public class ServerDatabase {
     }
 
     public void purge() throws SQLException {
-
-        dataDao.executeRaw("DELETE FROM %s WHERE lastUpdated < %s".formatted(dataDao.getTableName(), String.valueOf(System.currentTimeMillis() - 60000)));
-
+        long cutoff = System.currentTimeMillis() - 60000;
+        dataDao.executeRaw("DELETE FROM " + dataDao.getTableName() + " WHERE lastUpdated < " + cutoff);
     }
 
     public void update() throws SQLException {
@@ -65,19 +83,13 @@ public class ServerDatabase {
         new BukkitRunnable() {
             @Override
             public void run() {
-
                 try {
-
                     update();
-
                     purge();
-
                     plugin.getServerListCache().fetchServers();
-
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-
             }
         }.runTaskTimerAsynchronously(plugin, 0L, 20L * 30);
     }

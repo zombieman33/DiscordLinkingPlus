@@ -6,7 +6,7 @@
 
     <groupId>me.zombieman.dev</groupId>
     <artifactId>DiscordLinkingPlus</artifactId>
-    <version>1.6.8</version>
+    <version>1.6.9</version>
     <packaging>jar</packaging>
 
     <name>DiscordLinkingPlus</name>
@@ -111,6 +111,11 @@
             <artifactId>api</artifactId>
             <version>5.4</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>6.3.0</version>
         </dependency>
 
     </dependencies>

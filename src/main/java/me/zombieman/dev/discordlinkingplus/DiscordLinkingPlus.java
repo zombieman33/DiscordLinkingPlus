@@ -215,7 +215,7 @@ public final class DiscordLinkingPlus extends JavaPlugin {
 
         if (playerDatabase != null) {
             playerDatabase.close();
-            getLogger().info("MySQL database connection closed.");
+            getLogger().info("MySQL player database connection closed.");
         }
         if (codeManager != null) {
             codeManager.close();
@@ -224,6 +224,10 @@ public final class DiscordLinkingPlus extends JavaPlugin {
         if (discordDatabase != null) {
             discordDatabase.close();
             getLogger().info("MySQL discord database connection closed.");
+        }
+        if (serverDatabase != null) {
+            serverDatabase.close();
+            getLogger().info("MySQL server database connection closed.");
         }
         if (linkStatisticsDatabase != null) {
             linkStatisticsDatabase.close();
