@@ -136,10 +136,11 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
 
     private void resetRewards(CommandSender sender, String server) throws SQLException {
         Collection<ServerData> serverData = plugin.getServerListCache().getServers();
-        List<String> servers = serverData.stream().map(ServerData::getServerID).collect(Collectors.toList());
+        List<String> servers = serverData.stream().map(ServerData::getServerID).toList();
 
         if (!servers.contains(server)) {
             sender.sendMessage(ChatColor.RED + "This server doesn't exist!");
+            sender.sendMessage(ChatColor.RED + "Please make sure you're typing the server name correctly!");
             return;
         }
 
@@ -175,7 +176,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 }
             }
 
-            if (args[0].equalsIgnoreCase("reset")) {
+            if (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("resetserverrewardssotechdoesnotdoubthimself") || args[0].equalsIgnoreCase("resetrewards")) {
                 Collection<ServerData> servers = plugin.getServerListCache().getServers();
                 completions.addAll(servers.stream().map(ServerData::getServerID).collect(Collectors.toList()));
             }
@@ -198,8 +199,14 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 .clickEvent(ClickEvent.copyToClipboard(playerData.getUuid()))
                 .hoverEvent(HoverEvent.showText(mm.deserialize("<italic><gray>Click to copy UUID</gray></italic>")));
 
-        Component discordTag = mm.deserialize(color + "<bold>▪ Discord Tag:</bold> <white>" + playerData.getDiscordTag() + "</white>")
-                .clickEvent(ClickEvent.copyToClipboard(playerData.getDiscordTag()))
+        String tag = "n/a";
+
+        if (playerData.getDiscordTag() != null) {
+            tag = playerData.getDiscordTag();
+        }
+
+        Component discordTag = mm.deserialize(color + "<bold>▪ Discord Tag:</bold> <white>" + tag  + "</white>")
+                .clickEvent(ClickEvent.copyToClipboard(tag))
                 .hoverEvent(HoverEvent.showText(mm.deserialize("<italic><gray>Click to copy Discord Tag</gray></italic>")));
 
         Component isLinked = mm.deserialize(color + "<bold>▪ Linked with Discord:</bold> <white>" + playerData.isLinked() + "</white>");
